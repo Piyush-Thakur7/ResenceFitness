@@ -78,7 +78,7 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
   `;
 
   const result = await model.generateContent({
-    contents: prompt,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: 'application/json',
     },
@@ -130,7 +130,7 @@ export async function generateDietPlan(profile) {
   `;
 
   const result = await model.generateContent({
-    contents: prompt,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: 'application/json',
     },
@@ -167,7 +167,8 @@ export async function analyzeFoodPhoto(base64Image, mimeType = 'image/jpeg') {
     }
   `;
 
-  const result = await model.generateContent([prompt, imagePart], {
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }, imagePart] }],
     generationConfig: {
       responseMimeType: 'application/json',
     },
@@ -205,7 +206,9 @@ export async function analyzeBodyPhotos(base64Images, profile, mimeType = 'image
     Be supportive, factual, and strictly constructive. Avoid overly critical language.
   `;
 
-  const result = await model.generateContent([prompt, ...imageParts]);
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }, ...imageParts] }]
+  });
   return result.response.text();
 }
 
@@ -255,7 +258,7 @@ export async function reEvaluatePlan(profile, currentPlan, completionRate, weigh
   `;
 
   const result = await model.generateContent({
-    contents: prompt,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: 'application/json',
     },
