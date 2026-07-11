@@ -25,7 +25,7 @@ export default function WorkoutSection({
 
   // Render MuscleWiki link helper
   const getMuscleWikiLink = (exerciseName) => {
-    return `https://musclewiki.com/search?q=${encodeURIComponent(exerciseName)}`;
+    return `https://www.google.com/search?q=site%3Amusclewiki.com+${encodeURIComponent(exerciseName)}`;
   };
 
   // Helper to check if an exercise is completed in logs
