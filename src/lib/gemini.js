@@ -22,6 +22,7 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
   const prompt = `
     You are a professional fitness coach. Generate a personalized weekly workout plan (Monday to Sunday) for a user with the following details:
     - Age: ${calculateAge(profile.dob)} years
+    - Gender: ${profile.gender || 'male'}
     - Height: ${profile.height} cm
     - Weight: ${profile.weight} kg
     - Fitness Goal: ${profile.fitness_goal}
@@ -32,8 +33,10 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
     Requirements:
     1. Monday to Saturday should be active, Sunday should be rest.
     2. Active days must have:
-       - A gym workout session (~45 mins) organized by muscle group.
-       - A running session (default 3km total, but split into chunks like "3 x 1km" or "1.5km x 2" based on typical stamina/goals. If bulky goal, running can be shorter, if lean/athletic it can be steady).
+       - A gym workout session (~45-60 mins) organized by muscle group.
+       - A dedicated pre-workout warm-up instruction detailing 2-3 dynamic stretching movements.
+       - Include at least 5 to 6 structured core strength exercises in the daily plan.
+       - A running session (default 3km total, but split into chunks like "3 x 1km" or "1.5km x 2" based on typical stamina/goals. If bulky goal, running can be shorter, if lean/athletic/fat-loss it can be steady).
        - Include name of the exercise and the target muscle group. Do NOT generate MuscleWiki URLs, just output name and muscle group.
     3. If boxing/martial arts is enabled, adjust the daily plan to incorporate martial arts drills or boxing bag work (adjusting time/exercises accordingly).
     4. Implement built-in recovery logic: if there are consecutive hard training days on the same muscle group, auto-suggest a lighter active-recovery day.
@@ -45,7 +48,8 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
         "monday": {
           "muscle_group": "string",
           "is_rest": false,
-          "gym_duration_minutes": 45,
+          "gym_duration_minutes": 55,
+          "pre_workout_warmup": "string detailing warm-up steps (e.g. 5 mins arm circles, dynamic chest stretches)",
           "running": {
             "distance_km": 3,
             "chunks": "e.g., 3 x 1km",

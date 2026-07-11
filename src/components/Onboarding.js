@@ -14,6 +14,16 @@ const fitnessGoals = [
     ),
   },
   {
+    id: 'Fat Loss',
+    title: 'Fat Loss',
+    description: 'Maximize metabolic rate, target steady calorie deficit, and maintain core stamina.',
+    svg: (
+      <svg className="w-12 h-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 8v8m-4-5v5m-4-2v2M4 4h16v16H4V4z" />
+      </svg>
+    ),
+  },
+  {
     id: 'Bulky',
     title: 'Bulky',
     description: 'Gain muscle mass, increase size, and maximize raw physical strength.',
@@ -65,6 +75,7 @@ const dietPreferences = [
 export default function Onboarding({ user, onComplete }) {
   const [step, setStep] = useState(1);
   const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('male');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [diet, setDiet] = useState('Non-Veg');
@@ -118,6 +129,7 @@ export default function Onboarding({ user, onComplete }) {
         id: user.id,
         email: user.email,
         dob,
+        gender,
         height: parsedHeight,
         weight: parsedWeight,
         diet_preference: diet,
@@ -182,6 +194,26 @@ export default function Onboarding({ user, onComplete }) {
                       Age: <strong className="text-orange-500">{calculateAge(dob)}</strong> years old
                     </span>
                   )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">Gender (affects exercise recommendations)</label>
+                <div className="flex space-x-4 max-w-sm">
+                  <button
+                    type="button"
+                    onClick={() => setGender('male')}
+                    className={`flex-1 py-2.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer ${gender === 'male' ? 'bg-orange-500 border-orange-500 text-white' : 'bg-zinc-950 border-zinc-850 text-zinc-400 hover:border-zinc-700'}`}
+                  >
+                    Male
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGender('female')}
+                    className={`flex-1 py-2.5 px-4 rounded-xl border text-xs font-bold transition-all cursor-pointer ${gender === 'female' ? 'bg-orange-500 border-orange-500 text-white' : 'bg-zinc-950 border-zinc-850 text-zinc-400 hover:border-zinc-700'}`}
+                  >
+                    Female
+                  </button>
                 </div>
               </div>
 

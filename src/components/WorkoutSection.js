@@ -93,6 +93,88 @@ const MOCK_POSTURES = {
   }
 };
 
+// Animated Vector SVG player for exercises
+function AnimatedExerciseDemo({ muscle = '' }) {
+  const m = muscle.toLowerCase();
+  
+  if (m.includes('chest')) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
+        {/* Animated Barbell */}
+        <div className="w-24 h-1.5 bg-zinc-700 rounded-full animate-bounce duration-1000 flex items-center justify-between px-1 relative z-10">
+          <div className="w-3.5 h-6 bg-zinc-600 rounded" />
+          <div className="w-3.5 h-6 bg-zinc-600 rounded" />
+        </div>
+        {/* Bench Silhouette */}
+        <div className="w-20 h-2 bg-zinc-900 border border-zinc-800 mt-4 rounded-full z-0" />
+        <div className="w-2.5 h-6 bg-zinc-900 border border-zinc-800 z-0" />
+        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Chest Press Motion</span>
+      </div>
+    );
+  } else if (m.includes('shoulder')) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
+        <div className="flex space-x-12 animate-bounce duration-1000 relative z-10">
+          <div className="w-4 h-5 bg-zinc-800 rounded flex items-center justify-center"><div className="w-1.5 h-5 bg-zinc-650" /></div>
+          <div className="w-4 h-5 bg-zinc-800 rounded flex items-center justify-center"><div className="w-1.5 h-5 bg-zinc-650" /></div>
+        </div>
+        <div className="w-10 h-12 rounded-t-xl bg-zinc-900 border border-zinc-800 mt-2 flex items-center justify-center z-0">
+          <div className="w-3 h-3 bg-orange-500/40 rounded-full animate-pulse" />
+        </div>
+        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Shoulder Press Motion</span>
+      </div>
+    );
+  } else if (m.includes('back') || m.includes('lat')) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
+        <div className="w-24 h-1.5 bg-zinc-800 rounded-full animate-bounce duration-1000 relative z-10 flex flex-col items-center">
+          <div className="w-1 h-6 bg-zinc-700" />
+        </div>
+        <div className="w-8 h-10 bg-zinc-900 border border-zinc-800 mt-1 rounded flex flex-col items-center justify-center">
+          <div className="w-4 h-5 bg-green-500/20 rounded border border-green-500/40 animate-pulse" />
+        </div>
+        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Pulldown / Row Motion</span>
+      </div>
+    );
+  } else if (m.includes('bicep') || m.includes('tricep') || m.includes('arm')) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <div className="w-3.5 h-3.5 bg-zinc-800 rounded-full relative z-20" />
+          <div className="absolute w-1.5 h-8 bg-zinc-700 origin-bottom rounded-full animate-pulse" style={{ transformOrigin: 'bottom center', transform: 'rotate(-45deg)' }} />
+          <div className="absolute w-3 h-3 bg-orange-500 rounded z-30" style={{ transform: 'translateY(-10px)' }} />
+        </div>
+        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Arm Curl / Extension</span>
+      </div>
+    );
+  } else if (m.includes('leg') || m.includes('quad') || m.includes('hamstring') || m.includes('glute') || m.includes('calf')) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
+        <div className="w-8 h-8 border border-zinc-800 bg-zinc-900 rounded-lg animate-bounce duration-1000 flex flex-col items-center justify-end p-1">
+          <div className="w-4 h-4 bg-orange-500/20 rounded border border-orange-500/30 animate-pulse" />
+        </div>
+        <div className="w-14 h-1.5 bg-zinc-900 rounded-full mt-1" />
+        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Squat / Leg Drive</span>
+      </div>
+    );
+  } else {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
+        <div className="w-10 h-10 border-2 border-dashed border-orange-500/40 rounded-full flex items-center justify-center animate-spin duration-3000">
+          <div className="w-5 h-5 bg-orange-500/20 rounded-full animate-ping" />
+        </div>
+        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Stamina & Core Shield</span>
+      </div>
+    );
+  }
+}
+
 export default function WorkoutSection({
   profile,
   workoutPlan,
@@ -110,7 +192,9 @@ export default function WorkoutSection({
       setActiveDay(today);
     }
   }, []);
+
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [modalTab, setModalTab] = useState('demo'); // 'demo' or 'wiki'
 
   const currentDayPlan = workoutPlan?.plan_data?.days?.[activeDay] || workoutPlan?.plan_data?.[activeDay] || null;
 
@@ -118,6 +202,7 @@ export default function WorkoutSection({
   const getMuscleWikiCategoryLink = (exerciseName, muscleGroup) => {
     const nameLower = exerciseName.toLowerCase();
     const muscleLower = (muscleGroup || '').toLowerCase().trim();
+    const genderStr = profile?.gender || 'male';
 
     let category = 'bodyweight';
     if (nameLower.includes('dumbbell')) category = 'dumbbells';
@@ -138,7 +223,7 @@ export default function WorkoutSection({
     else if (muscleLower.includes('glute')) muscle = 'glutes';
     else if (muscleLower.includes('core') || muscleLower.includes('abdom') || muscleLower.includes('abs')) muscle = 'abdominals';
 
-    return `https://musclewiki.com/${category}/male/${muscle}`;
+    return `https://musclewiki.com/${category}/${genderStr}/${muscle}`;
   };
 
   const getPostureDetails = (name) => {
@@ -282,6 +367,14 @@ export default function WorkoutSection({
                   )}
                 </div>
 
+                {/* Pre-Workout Warm-Up Display */}
+                {currentDayPlan.pre_workout_warmup && (
+                  <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl space-y-1">
+                    <span className="text-[10px] text-green-500 font-bold uppercase block tracking-wider">Pre-Workout Warm-Up Routine</span>
+                    <p className="text-sm text-zinc-300">{currentDayPlan.pre_workout_warmup}</p>
+                  </div>
+                )}
+
                 {currentDayPlan.running && (
                   <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl space-y-1">
                     <span className="text-[10px] text-orange-500 font-bold uppercase block tracking-wider">Running Drill Instructions</span>
@@ -327,7 +420,10 @@ export default function WorkoutSection({
                           {/* Posture Guide Modal trigger */}
                           <button
                             type="button"
-                            onClick={() => setSelectedExercise(ex)}
+                            onClick={() => {
+                              setSelectedExercise(ex);
+                              setModalTab('demo');
+                            }}
                             className="flex-shrink-0 text-xs bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors cursor-pointer"
                           >
                             <span>Posture</span>
@@ -371,15 +467,15 @@ export default function WorkoutSection({
               
               <div>
                 <span className="text-[10px] bg-orange-950/40 text-orange-400 border border-orange-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  Posture & Form Guide
+                  Posture & Form Player
                 </span>
                 <h2 className="text-xl font-bold text-white mt-2">{selectedExercise.name}</h2>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Target Muscle: <strong className="text-zinc-200">{selectedExercise.muscle}</strong>
+                  Target Muscle: <strong className="text-zinc-200">{selectedExercise.muscle}</strong> | Gender: <strong className="text-zinc-200 capitalize">{profile?.gender || 'male'}</strong>
                 </p>
               </div>
 
-              {/* Modal Body: Instructions + MuscleWiki Embed iframe */}
+              {/* Modal Body: Instructions + Visual Demo Area */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Instructions column */}
                 <div className="space-y-3 bg-zinc-950 border border-zinc-850 p-4 rounded-xl text-xs">
@@ -397,20 +493,41 @@ export default function WorkoutSection({
                   </div>
                 </div>
 
-                {/* Embed/Link Column */}
+                {/* Embed/Animation Tabs Column */}
                 <div className="flex flex-col space-y-3">
-                  <div className="flex-1 bg-zinc-950 border border-zinc-850 rounded-xl overflow-hidden min-h-[180px] flex flex-col justify-center items-center p-4 text-center text-xs relative">
-                    {/* MuscleWiki Category Page Embed */}
-                    <iframe
-                      src={categoryLink}
-                      className="absolute inset-0 w-full h-full border-none opacity-85"
-                      title="MuscleWiki Exercises"
-                    />
-                    
-                    {/* Floating Helper */}
-                    <div className="absolute bottom-2 inset-x-2 bg-zinc-900/90 border border-zinc-850 rounded-lg p-2 text-[10px] text-zinc-400 leading-normal pointer-events-none">
-                      💡 Interactive map loaded. If blocked by browser headers, click below to open.
-                    </div>
+                  {/* Tab Selector */}
+                  <div className="flex bg-zinc-950 border border-zinc-850 p-1 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setModalTab('demo')}
+                      className={`flex-1 py-1 text-[10px] font-bold rounded cursor-pointer transition-colors ${modalTab === 'demo' ? 'bg-orange-500 text-white' : 'text-zinc-450 hover:text-white'}`}
+                    >
+                      Animated Motion
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModalTab('wiki')}
+                      className={`flex-1 py-1 text-[10px] font-bold rounded cursor-pointer transition-colors ${modalTab === 'wiki' ? 'bg-orange-500 text-white' : 'text-zinc-450 hover:text-white'}`}
+                    >
+                      MuscleWiki Portal
+                    </button>
+                  </div>
+
+                  <div className="flex-1 bg-zinc-950 border border-zinc-850 rounded-xl overflow-hidden min-h-[180px] flex flex-col justify-center items-center relative">
+                    {modalTab === 'demo' ? (
+                      <AnimatedExerciseDemo muscle={selectedExercise.muscle || selectedExercise.name} />
+                    ) : (
+                      <>
+                        <iframe
+                          src={categoryLink}
+                          className="absolute inset-0 w-full h-full border-none opacity-85"
+                          title="MuscleWiki Exercises"
+                        />
+                        <div className="absolute bottom-2 inset-x-2 bg-zinc-900/90 border border-zinc-850 rounded-lg p-2 text-[10px] text-zinc-400 leading-normal pointer-events-none text-center">
+                          💡 If blockages occur, use the direct link below.
+                        </div>
+                      </>
+                    )}
                   </div>
                   
                   <a

@@ -10,10 +10,11 @@ create table public.profiles (
   email text not null,
   full_name text,
   dob date,
+  gender text check (gender in ('male', 'female')) default 'male',
   height numeric, -- in cm
   weight numeric, -- in kg
   diet_preference text check (diet_preference in ('Veg', 'Non-Veg', 'Vegan', 'Eggetarian')),
-  fitness_goal text check (fitness_goal in ('Lean', 'Bulky', 'Athletic', 'Healthy', 'General Fitness')),
+  fitness_goal text check (fitness_goal in ('Lean', 'Bulky', 'Athletic', 'Healthy', 'General Fitness', 'Fat Loss')),
   injuries text, -- optional free text limitation
   boxing_or_martial_arts boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,

@@ -9,6 +9,7 @@ import DietSection from '@/components/DietSection';
 import SleepSection from '@/components/SleepSection';
 import BodyAssessmentSection from '@/components/BodyAssessmentSection';
 import ProgressSection from '@/components/ProgressSection';
+import MuscleExplorer from '@/components/MuscleExplorer';
 
 const LOGO_OPTIONS = [
   { id: 'logo_1', title: 'Option 1: Stylized "R" Mark', path: '/logos/logo_1.jpg', desc: 'Modern energy swoosh forming the letter "R" with orange and green gradients.' },
@@ -199,8 +200,8 @@ export default function Home() {
     setLoading(true);
 
     if (demoMode) {
-      // Mock login immediate success
-      const mockId = 'mock-user-id-999';
+      // Mock login immediate success with email-derived unique ID to preserve logins
+      const mockId = 'mock-' + btoa(authEmail.toLowerCase().trim()).replace(/=/g, '').substring(0, 16);
       const mockSession = {
         access_token: 'mock-token',
         user: { id: mockId, email: authEmail },
@@ -642,7 +643,7 @@ export default function Home() {
             </div>
             <div>
               <span className="font-extrabold tracking-tight text-white block">Resence Fitness</span>
-              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-widest mt-0.5">Gemini 3.5 Client</span>
+              <span className="text-[9px] text-orange-400 font-bold block uppercase tracking-widest mt-0.5">Discipline Equals Freedom</span>
             </div>
           </div>
           <button
@@ -929,7 +930,7 @@ export default function Home() {
           </div>
           <div>
             <span className="font-extrabold tracking-tight text-white block">Resence Fitness</span>
-            <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-widest mt-0.5">Gemini 3.5 Client</span>
+            <span className="text-[9px] text-green-400 font-bold block uppercase tracking-widest mt-0.5">Every Day Is Day One</span>
           </div>
         </div>
 
@@ -952,6 +953,7 @@ export default function Home() {
               { id: 'diet', label: 'Nutrition & Diet', icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z' },
               { id: 'sleep', label: 'Sleep Logs', icon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' },
               { id: 'body', label: 'AI Assessment', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z' },
+              { id: 'explorer', label: 'Muscle Explorer', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
               { id: 'progress', label: 'Stats & Branding', icon: 'M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z' },
             ].map((tab) => {
               const active = activeTab === tab.id;
@@ -1037,6 +1039,10 @@ export default function Home() {
             />
           )}
 
+          {activeTab === 'explorer' && (
+            <MuscleExplorer profile={profile} />
+          )}
+
           {activeTab === 'progress' && (
             <ProgressSection
               profile={profile}
@@ -1060,88 +1066,129 @@ export default function Home() {
 function getMockWorkoutPlan(profile) {
   const isKneeIssue = (profile.injuries || '').toLowerCase().includes('knee');
   const addBoxing = profile.boxing_or_martial_arts;
+  const isFatLoss = profile.fitness_goal === 'Fat Loss';
   
   const mondayGym = [
+    { name: 'Flat Barbell Bench Press', muscle: 'Chest', sets: 4, reps: '8-10', notes: 'Control the eccentric phase down to chest.' },
     { name: 'Incline Dumbbell Press', muscle: 'Chest', sets: 4, reps: '8-12', notes: 'Keep elbows tucked at a 45-degree angle.' },
-    { name: 'Flat Barbell Bench Press', muscle: 'Chest', sets: 3, reps: '8-10', notes: 'Control the eccentric phase down to chest.' },
-    { name: 'Overhead Cable Tricep Extension', muscle: 'Triceps', sets: 3, reps: '12-15', notes: 'Flare lats for stability.' },
+    { name: 'Dumbbell Chest Flyes', muscle: 'Chest', sets: 3, reps: '12', notes: 'Maintain a slight elbow bend, feel the chest stretch.' },
+    { name: 'Overhead Cable Tricep Extension', muscle: 'Triceps', sets: 3, reps: '12-15', notes: 'Keep upper arms locked alongside ears.' },
+    { name: 'Tricep Rope Pushdowns', muscle: 'Triceps', sets: 3, reps: '15', notes: 'Squeeze and flare the rope ends at the bottom lockout.' },
+    { name: 'Diamond Pushups', muscle: 'Triceps & Chest', sets: 3, reps: 'Max', notes: 'Focus on full elbow extension at peak contraction.' }
   ];
 
   const tuesdayGym = [
     { name: 'Lat Pulldown (Wide Grip)', muscle: 'Back', sets: 4, reps: '10-12', notes: 'Squeeze shoulder blades down and back.' },
-    { name: 'Single-Arm Dumbbell Row', muscle: 'Back', sets: 3, reps: '8-10', notes: 'Pull toward hip rather than shoulder.' },
-    { name: 'Incline Dumbbell Bicep Curl', muscle: 'Biceps', sets: 3, reps: '12', notes: 'Keep elbows pinned behind torso.' },
+    { name: 'Single-Arm Dumbbell Row', muscle: 'Back', sets: 4, reps: '8-10', notes: 'Pull toward hip rather than shoulder.' },
+    { name: 'Barbell Bent-Over Row', muscle: 'Back', sets: 3, reps: '8-10', notes: 'Keep spine flat, pull bar to lower stomach.' },
+    { name: 'Incline Dumbbell Bicep Curl', muscle: 'Biceps', sets: 3, reps: '12', notes: 'Keep elbows pinned back behind torso.' },
+    { name: 'Hammer Curls', muscle: 'Biceps', sets: 3, reps: '12', notes: 'Keep palms facing each other throughout curling motion.' },
+    { name: 'Reverse Grip Chin-Ups', muscle: 'Back & Biceps', sets: 3, reps: '6-8', notes: 'Focus on pulling with your back and arms.' }
   ];
 
-  const WednesdayGym = isKneeIssue ? [
+  const wednesdayGym = isKneeIssue ? [
     { name: 'Stretching & Core recovery drills', muscle: 'Core', sets: 3, reps: '30s hold', notes: 'Low impact planks and bird-dogs to recover legs/joints.' },
+    { name: 'Hanging Leg Raise', muscle: 'Core', sets: 3, reps: '12', notes: 'Slow negatives, avoid swinging body.' },
+    { name: 'Decline Bench Crunch', muscle: 'Core', sets: 3, reps: '15', notes: 'Focus on squeezing upper abdominal wall.' },
+    { name: 'Plank Hold', muscle: 'Core', sets: 3, reps: '45s', notes: 'Squeeze glutes and brace stomach.' },
   ] : [
     { name: 'Leg Extensions (Quad focus)', muscle: 'Quads', sets: 4, reps: '12-15', notes: 'Squeeze hard at the peak contraction.' },
-    { name: 'Seated Leg Curl (Hamstrings)', muscle: 'Hamstrings', sets: 3, reps: '10-12', notes: 'Keep toes flexed forward.' },
+    { name: 'Seated Leg Curl (Hamstrings)', muscle: 'Hamstrings', sets: 4, reps: '10-12', notes: 'Keep toes flexed forward.' },
+    { name: 'Romanian Dumbbell Deadlift', muscle: 'Hamstrings & Glutes', sets: 3, reps: '10', notes: 'Keep back flat, push hips backward.' },
+    { name: 'Dumbbell Goblet Squat', muscle: 'Quads & Glutes', sets: 3, reps: '12', notes: 'Keep chest upright, push knees out.' },
+    { name: 'Standing Calf Raises', muscle: 'Calves', sets: 4, reps: '15', notes: 'Hold calf stretch for 1 second at bottom.' },
+    { name: 'Glute Bridges', muscle: 'Glutes', sets: 3, reps: '15', notes: 'Squeeze glutes at top of bridge.' }
+  ];
+
+  const thursdayGym = [
+    { name: 'Dumbbell Shoulder Press', muscle: 'Shoulders', sets: 4, reps: '8-10', notes: 'Do not lock out elbows at top.' },
+    { name: 'Lateral Raises', muscle: 'Shoulders', sets: 4, reps: '15', notes: 'Lead with elbows, hands slightly lower than elbows.' },
+    { name: 'Rear Delt Flyes', muscle: 'Shoulders', sets: 3, reps: '15', notes: 'Keep chest down, avoid shoulder shrugging.' },
+    { name: 'Hanging Leg Raise', muscle: 'Core', sets: 3, reps: '12', notes: 'Slow negatives.' },
+    { name: 'Ab Wheel Rollouts', muscle: 'Core', sets: 3, reps: '10', notes: 'Roll out under control, squeeze abs to pull back.' },
+    { name: 'Plank Hold', muscle: 'Core', sets: 3, reps: '60s', notes: 'Maintain straight board line.' }
+  ];
+
+  const fridayGym = [
+    { name: 'Close-Grip Bench Press', muscle: 'Triceps', sets: 4, reps: '8-10', notes: 'Keeps elbows tucked close to ribcage.' },
+    { name: 'Barbell Bicep Curl', muscle: 'Biceps', sets: 4, reps: '10', notes: 'Do not swing back to lift weight.' },
+    { name: 'Skull Crushers', muscle: 'Triceps', sets: 3, reps: '12', notes: 'Lower bar to forehead slowly.' },
+    { name: 'Concentration Curls', muscle: 'Biceps', sets: 3, reps: '12', notes: 'Brace elbow against thigh.' },
+    { name: 'Tricep Rope Pushdowns', muscle: 'Triceps', sets: 3, reps: '15', notes: 'Lock arms out at bottom.' },
+    { name: 'Wrist Curls', muscle: 'Forearms', sets: 3, reps: '15', notes: 'Squeeze forearms at top.' }
   ];
 
   // Adjust boxing day
   const saturdayExercises = addBoxing ? [
     { name: 'Heavy Bag Conditioning Rounds', muscle: 'Shoulders & Core', sets: 5, reps: '3 mins', notes: 'Combine jabs, hooks, and footwork drills.' },
     { name: 'Shadow Boxing with Light Dumbbells', muscle: 'Shoulders', sets: 3, reps: '2 mins', notes: 'Keep speed fast but punches controlled.' },
+    { name: 'Jump Rope Conditioning', muscle: 'Calves & Cardio', sets: 3, reps: '3 mins', notes: 'Maintains steady bouncing rhythm.' },
+    { name: 'Mountain Climbers', muscle: 'Core', sets: 3, reps: '45s', notes: 'Drive knees fast, keep hips low.' },
+    { name: 'Plank Hold', muscle: 'Core', sets: 3, reps: '60s', notes: 'Keep core active.' }
   ] : [
     { name: 'Standing Dumbbell Shoulder Press', muscle: 'Shoulders', sets: 4, reps: '8-10', notes: 'Do not lock out elbows at top.' },
-    { name: 'Lateral Raises', muscle: 'Shoulders', sets: 3, reps: '15', notes: 'Lead with elbows, pinkies slightly up.' },
+    { name: 'Dumbbell lateral raise', muscle: 'Shoulders', sets: 4, reps: '15', notes: 'Lead with elbows, pinkies slightly up.' },
+    { name: 'Face Pulls', muscle: 'Shoulders', sets: 3, reps: '15', notes: 'Pull rope ends to ears, flare elbows.' },
+    { name: 'Front Raises', muscle: 'Shoulders', sets: 3, reps: '12', notes: 'Lift dumbbells to eye level.' },
+    { name: 'Shadow Boxing / Jump Rope', muscle: 'Cardio', sets: 3, reps: '3 mins', notes: 'Keep body bouncing.' },
+    { name: 'Mountain Climbers', muscle: 'Core', sets: 3, reps: '45s', notes: 'Fast dynamic knee drives.' }
   ];
 
   return {
     recovery_notes: isKneeIssue 
       ? '⚠️ Plan adapted for knee limitation. High-impact squats/lunges omitted. Running split replaced by walking.'
+      : isFatLoss 
+      ? '🔥 Plan calibrated for Fat Loss. Higher exercise volume, shorter rest periods (~45s), and steady state running programmed.'
       : 'Weekly plan cycles push/pull/legs. Tuesday/Wednesday consecutive training resolved by introducing lower-intensity shoulder conditioning.',
     days: {
       monday: {
         muscle_group: 'Chest & Triceps',
         is_rest: false,
-        gym_duration_minutes: 45,
-        running: { distance_km: 3, chunks: '3 x 1km', instructions: 'Rest 90 seconds between each 1km rep.' },
+        gym_duration_minutes: 55,
+        pre_workout_warmup: '5 mins arm circles, dynamic chest stretches, shoulder shrugs.',
+        running: { distance_km: isFatLoss ? 4 : 3, chunks: '3 x 1km', instructions: 'Rest 90 seconds between each 1km rep.' },
         exercises: mondayGym,
       },
       tuesday: {
         muscle_group: 'Back & Biceps',
         is_rest: false,
-        gym_duration_minutes: 45,
-        running: { distance_km: 3, chunks: '1.5km x 2', instructions: 'Moderate pacing, rest 3 mins between intervals.' },
+        gym_duration_minutes: 55,
+        pre_workout_warmup: '5 mins cat-cow stretches, dynamic lats stretch, band pull-aparts.',
+        running: { distance_km: isFatLoss ? 4 : 3, chunks: '1.5km x 2', instructions: 'Moderate pacing, rest 3 mins between intervals.' },
         exercises: tuesdayGym,
       },
       wednesday: {
         muscle_group: isKneeIssue ? 'Active Stretch Recovery' : 'Legs & Calves',
-        is_rest: isKneeIssue,
-        gym_duration_minutes: isKneeIssue ? 20 : 45,
+        is_rest: false,
+        gym_duration_minutes: isKneeIssue ? 30 : 55,
+        pre_workout_warmup: '5 mins dynamic leg swings, bodyweight air squats, knee rotations.',
         running: isKneeIssue 
           ? { distance_km: 2, chunks: '2km walk', instructions: 'Continuous low-impact recovery walk.' }
-          : { distance_km: 3, chunks: '3km steady', instructions: 'Zone 2 aerobic recovery run.' },
-        exercises: WednesdayGym,
+          : { distance_km: isFatLoss ? 4 : 3, chunks: '3km steady', instructions: 'Zone 2 aerobic recovery run.' },
+        exercises: wednesdayGym,
       },
       thursday: {
         muscle_group: 'Shoulders & Core',
         is_rest: false,
-        gym_duration_minutes: 45,
-        running: { distance_km: 3, chunks: '3 x 1km', instructions: 'Rest 90 seconds between runs.' },
-        exercises: [
-          { name: 'Military Press', muscle: 'Shoulders', sets: 4, reps: '8-10', notes: 'Keep core tight.' },
-          { name: 'Hanging Leg Raise', muscle: 'Core', sets: 3, reps: '12', notes: 'Slow negatives.' },
-        ],
+        gym_duration_minutes: 55,
+        pre_workout_warmup: '5 mins shoulder sweeps, active dynamic plank holds, head rotations.',
+        running: { distance_km: isFatLoss ? 4 : 3, chunks: '3 x 1km', instructions: 'Rest 90 seconds between runs.' },
+        exercises: thursdayGym,
       },
       friday: {
         muscle_group: 'Arms & Conditioning',
         is_rest: false,
-        gym_duration_minutes: 40,
-        running: { distance_km: 3, chunks: '3km steady', instructions: 'Continuous tempo run.' },
-        exercises: [
-          { name: 'Tricep Rope Pushdowns', muscle: 'Triceps', sets: 3, reps: '15', notes: 'Hold lockout for 1s.' },
-          { name: 'Hammer Curls', muscle: 'Biceps', sets: 3, reps: '12', notes: 'Control lower.' },
-        ],
+        gym_duration_minutes: 50,
+        pre_workout_warmup: '5 mins dynamic wrist rotations, arm extensions, dynamic elbow curls.',
+        running: { distance_km: isFatLoss ? 4 : 3, chunks: '3km steady', instructions: 'Continuous tempo run.' },
+        exercises: fridayGym,
       },
       saturday: {
         muscle_group: addBoxing ? 'Boxing Drills & Conditioning' : 'Shoulders Focus',
         is_rest: false,
-        gym_duration_minutes: 45,
-        running: { distance_km: 2, chunks: '1km x 2 sprint', instructions: 'High intensity sprints, 2 mins rest.' },
+        gym_duration_minutes: 55,
+        pre_workout_warmup: '5 mins shadow boxing, dynamic jump rope simulation, hip openers.',
+        running: { distance_km: isFatLoss ? 3 : 2, chunks: '1km x 2 sprint', instructions: 'High intensity sprints, 2 mins rest.' },
         exercises: saturdayExercises,
       },
       sunday: {
@@ -1156,12 +1203,15 @@ function getMockDietPlan(profile) {
   const isVeg = ['Veg', 'Vegan'].includes(profile.diet_preference);
   const isBulky = profile.fitness_goal === 'Bulky';
   const isLean = profile.fitness_goal === 'Lean';
+  const isFatLoss = profile.fitness_goal === 'Fat Loss';
 
   let targets = { calories: 2200, protein: 130, carbs: 250, fat: 70 };
   if (isBulky) {
     targets = { calories: 2900, protein: 170, carbs: 360, fat: 90 };
   } else if (isLean) {
     targets = { calories: 1750, protein: 145, carbs: 160, fat: 50 };
+  } else if (isFatLoss) {
+    targets = { calories: 1550, protein: 140, carbs: 135, fat: 45 };
   }
 
   const vegMeals = {
