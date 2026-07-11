@@ -81,7 +81,7 @@ export default function Onboarding({ user, onComplete }) {
   const [diet, setDiet] = useState('Non-Veg');
   const [goal, setGoal] = useState('General Fitness');
   const [injuries, setInjuries] = useState('');
-  const [martialArts, setMartialArts] = useState(false);
+  const [conditioning, setConditioning] = useState('Running');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -135,7 +135,7 @@ export default function Onboarding({ user, onComplete }) {
         diet_preference: diet,
         fitness_goal: goal,
         injuries: injuries.trim() || null,
-        boxing_or_martial_arts: martialArts,
+        conditioning_preference: conditioning,
       });
     } catch (err) {
       setError(err.message || 'Failed to submit onboarding profile.');
@@ -279,18 +279,25 @@ export default function Onboarding({ user, onComplete }) {
               </div>
 
               <div className="pt-4 border-t border-zinc-800">
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={martialArts}
-                    onChange={(e) => setMartialArts(e.target.checked)}
-                    className="w-5 h-5 rounded border-zinc-800 text-orange-500 focus:ring-orange-500 bg-zinc-950"
-                  />
-                  <div>
-                    <span className="text-white font-medium text-sm">Add Boxing / Martial Arts Training</span>
-                    <p className="text-zinc-400 text-xs">Let Gemini adjust your daily routine to integrate martial arts conditioning.</p>
-                  </div>
-                </label>
+                <label className="block text-sm font-medium text-zinc-300 mb-3">Daily Conditioning Focus (Optional)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    { id: 'None', label: 'Strength Only (No Cardio)', desc: 'Focus entirely on resistance exercises, skipping daily running/cardio.' },
+                    { id: 'Running', label: 'Running / Jogging', desc: 'Standard dynamic running drills and weekly aerobic interval splits.' },
+                    { id: 'Rope Skipping', label: 'Rope Skipping / Agility', desc: 'Perform jump rope sessions and light aerobic agility conditioning.' },
+                    { id: 'Boxing', label: 'Boxing / MMA Drills', desc: 'Incorporate shadow boxing, heavy bag work, and martial arts drills.' },
+                  ].map((cond) => (
+                    <button
+                      key={cond.id}
+                      type="button"
+                      onClick={() => setConditioning(cond.id)}
+                      className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${conditioning === cond.id ? 'bg-orange-950/20 border-orange-500 shadow-md shadow-orange-500/10' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'}`}
+                    >
+                      <h3 className="font-semibold text-white text-xs">{cond.label}</h3>
+                      <p className="text-zinc-400 text-[10px] mt-1 leading-relaxed">{cond.desc}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

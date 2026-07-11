@@ -16,7 +16,7 @@ create table public.profiles (
   diet_preference text check (diet_preference in ('Veg', 'Non-Veg', 'Vegan', 'Eggetarian')),
   fitness_goal text check (fitness_goal in ('Lean', 'Bulky', 'Athletic', 'Healthy', 'General Fitness', 'Fat Loss')),
   injuries text, -- optional free text limitation
-  boxing_or_martial_arts boolean default false,
+  conditioning_preference text check (conditioning_preference in ('None', 'Running', 'Rope Skipping', 'Boxing')) default 'Running',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

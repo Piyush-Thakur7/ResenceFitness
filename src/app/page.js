@@ -1065,7 +1065,7 @@ export default function Home() {
 
 function getMockWorkoutPlan(profile) {
   const isKneeIssue = (profile.injuries || '').toLowerCase().includes('knee');
-  const addBoxing = profile.boxing_or_martial_arts;
+  const condPref = profile.conditioning_preference || 'Running';
   const isFatLoss = profile.fitness_goal === 'Fat Loss';
   
   const mondayGym = [
@@ -1118,8 +1118,7 @@ function getMockWorkoutPlan(profile) {
     { name: 'Wrist Curls', muscle: 'Forearms', sets: 3, reps: '15', notes: 'Squeeze forearms at top.' }
   ];
 
-  // Adjust boxing day
-  const saturdayExercises = addBoxing ? [
+  const saturdayExercises = condPref === 'Boxing' ? [
     { name: 'Heavy Bag Conditioning Rounds', muscle: 'Shoulders & Core', sets: 5, reps: '3 mins', notes: 'Combine jabs, hooks, and footwork drills.' },
     { name: 'Shadow Boxing with Light Dumbbells', muscle: 'Shoulders', sets: 3, reps: '2 mins', notes: 'Keep speed fast but punches controlled.' },
     { name: 'Jump Rope Conditioning', muscle: 'Calves & Cardio', sets: 3, reps: '3 mins', notes: 'Maintains steady bouncing rhythm.' },
@@ -1134,19 +1133,38 @@ function getMockWorkoutPlan(profile) {
     { name: 'Mountain Climbers', muscle: 'Core', sets: 3, reps: '45s', notes: 'Fast dynamic knee drives.' }
   ];
 
+  const getCardioSession = (dayName) => {
+    if (condPref === 'None') return null;
+    if (condPref === 'Running') {
+      const dist = isFatLoss ? 4 : 3;
+      if (dayName === 'tuesday') return { distance_km: dist, chunks: '1.5km x 2', instructions: 'Moderate pacing, rest 3 mins between intervals.' };
+      if (dayName === 'wednesday') return isKneeIssue ? { distance_km: 2, chunks: '2km walk', instructions: 'Continuous low-impact recovery walk.' } : { distance_km: dist, chunks: '3km steady', instructions: 'Zone 2 aerobic recovery run.' };
+      if (dayName === 'friday') return { distance_km: dist, chunks: '3km steady', instructions: 'Continuous tempo run.' };
+      if (dayName === 'saturday') return { distance_km: isFatLoss ? 3 : 2, chunks: '1km x 2 sprint', instructions: 'High intensity sprints, 2 mins rest.' };
+      return { distance_km: dist, chunks: '3 x 1km', instructions: 'Rest 90 seconds between each 1km rep.' };
+    }
+    if (condPref === 'Rope Skipping') {
+      return { distance_km: 0, chunks: '4 Rounds', instructions: '4 rounds of 3 mins jump rope, fast pace, rest 60s between rounds.' };
+    }
+    if (condPref === 'Boxing') {
+      return { distance_km: 0, chunks: '5 Rounds', instructions: '5 rounds of heavy bag combo work and shadow boxing drills.' };
+    }
+    return null;
+  };
+
   return {
     recovery_notes: isKneeIssue 
-      ? '⚠️ Plan adapted for knee limitation. High-impact squats/lunges omitted. Running split replaced by walking.'
+      ? '⚠️ Plan adapted for knee limitation. High-impact squats/lunges omitted. Running/Cardio drills replaced by walking.'
       : isFatLoss 
-      ? '🔥 Plan calibrated for Fat Loss. Higher exercise volume, shorter rest periods (~45s), and steady state running programmed.'
-      : 'Weekly plan cycles push/pull/legs. Tuesday/Wednesday consecutive training resolved by introducing lower-intensity shoulder conditioning.',
+      ? '🔥 Plan calibrated for Fat Loss. Higher exercise volume, shorter rest periods (~45s), and steady state conditioning programmed.'
+      : `Weekly plan cycles strength targets. Conditioning is set to ${condPref} to fit your baseline preference.`,
     days: {
       monday: {
         muscle_group: 'Chest & Triceps',
         is_rest: false,
         gym_duration_minutes: 55,
         pre_workout_warmup: '5 mins arm circles, dynamic chest stretches, shoulder shrugs.',
-        running: { distance_km: isFatLoss ? 4 : 3, chunks: '3 x 1km', instructions: 'Rest 90 seconds between each 1km rep.' },
+        running: getCardioSession('monday'),
         exercises: mondayGym,
       },
       tuesday: {
@@ -1154,7 +1172,7 @@ function getMockWorkoutPlan(profile) {
         is_rest: false,
         gym_duration_minutes: 55,
         pre_workout_warmup: '5 mins cat-cow stretches, dynamic lats stretch, band pull-aparts.',
-        running: { distance_km: isFatLoss ? 4 : 3, chunks: '1.5km x 2', instructions: 'Moderate pacing, rest 3 mins between intervals.' },
+        running: getCardioSession('tuesday'),
         exercises: tuesdayGym,
       },
       wednesday: {
@@ -1162,9 +1180,7 @@ function getMockWorkoutPlan(profile) {
         is_rest: false,
         gym_duration_minutes: isKneeIssue ? 30 : 55,
         pre_workout_warmup: '5 mins dynamic leg swings, bodyweight air squats, knee rotations.',
-        running: isKneeIssue 
-          ? { distance_km: 2, chunks: '2km walk', instructions: 'Continuous low-impact recovery walk.' }
-          : { distance_km: isFatLoss ? 4 : 3, chunks: '3km steady', instructions: 'Zone 2 aerobic recovery run.' },
+        running: getCardioSession('wednesday'),
         exercises: wednesdayGym,
       },
       thursday: {
@@ -1172,7 +1188,7 @@ function getMockWorkoutPlan(profile) {
         is_rest: false,
         gym_duration_minutes: 55,
         pre_workout_warmup: '5 mins shoulder sweeps, active dynamic plank holds, head rotations.',
-        running: { distance_km: isFatLoss ? 4 : 3, chunks: '3 x 1km', instructions: 'Rest 90 seconds between runs.' },
+        running: getCardioSession('thursday'),
         exercises: thursdayGym,
       },
       friday: {
@@ -1180,15 +1196,15 @@ function getMockWorkoutPlan(profile) {
         is_rest: false,
         gym_duration_minutes: 50,
         pre_workout_warmup: '5 mins dynamic wrist rotations, arm extensions, dynamic elbow curls.',
-        running: { distance_km: isFatLoss ? 4 : 3, chunks: '3km steady', instructions: 'Continuous tempo run.' },
+        running: getCardioSession('friday'),
         exercises: fridayGym,
       },
       saturday: {
-        muscle_group: addBoxing ? 'Boxing Drills & Conditioning' : 'Shoulders Focus',
+        muscle_group: condPref === 'Boxing' ? 'Boxing Drills & Conditioning' : 'Shoulders Focus',
         is_rest: false,
         gym_duration_minutes: 55,
         pre_workout_warmup: '5 mins shadow boxing, dynamic jump rope simulation, hip openers.',
-        running: { distance_km: isFatLoss ? 3 : 2, chunks: '1km x 2 sprint', instructions: 'High intensity sprints, 2 mins rest.' },
+        running: getCardioSession('saturday'),
         exercises: saturdayExercises,
       },
       sunday: {

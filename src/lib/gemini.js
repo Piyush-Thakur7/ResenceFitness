@@ -27,7 +27,7 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
     - Weight: ${profile.weight} kg
     - Fitness Goal: ${profile.fitness_goal}
     - Injury/Physical Limitation: ${profile.injuries || 'None'}
-    - Boxing/Martial Arts add-on enabled: ${profile.boxing_or_martial_arts ? 'Yes' : 'No'}
+    - Conditioning Preference: ${profile.conditioning_preference || 'Running'}
     - Latest Body Assessment Report: ${assessmentReport || 'None'}
 
     Requirements:
@@ -36,11 +36,14 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
        - A gym workout session (~45-60 mins) organized by muscle group.
        - A dedicated pre-workout warm-up instruction detailing 2-3 dynamic stretching movements.
        - Include at least 5 to 6 structured core strength exercises in the daily plan.
-       - A running session (default 3km total, but split into chunks like "3 x 1km" or "1.5km x 2" based on typical stamina/goals. If bulky goal, running can be shorter, if lean/athletic/fat-loss it can be steady).
+       - A conditioning session modeled after their preference:
+         - If preference is 'None', the running/cardio key should be set to null.
+         - If preference is 'Running', generate running interval runs (e.g. 3km total, chunks like "3 x 1km").
+         - If preference is 'Rope Skipping', generate skipping drills (e.g., "4 rounds of 3 min jump rope, fast pace").
+         - If preference is 'Boxing', generate heavy bag and shadow boxing drills.
        - Include name of the exercise and the target muscle group. Do NOT generate MuscleWiki URLs, just output name and muscle group.
-    3. If boxing/martial arts is enabled, adjust the daily plan to incorporate martial arts drills or boxing bag work (adjusting time/exercises accordingly).
-    4. Implement built-in recovery logic: if there are consecutive hard training days on the same muscle group, auto-suggest a lighter active-recovery day.
-    5. Output the response in JSON format matching this schema:
+    3. Implement built-in recovery logic: if there are consecutive hard training days on the same muscle group, auto-suggest a lighter active-recovery day.
+    4. Output the response in JSON format matching this schema:
     {
       "week_start_date": "YYYY-MM-DD",
       "recovery_notes": "Explanation of the recovery logic and training structure",
@@ -52,9 +55,9 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
           "pre_workout_warmup": "string detailing warm-up steps (e.g. 5 mins arm circles, dynamic chest stretches)",
           "running": {
             "distance_km": 3,
-            "chunks": "e.g., 3 x 1km",
-            "instructions": "string"
-          },
+            "chunks": "e.g., 3 x 1km or 4 rounds",
+            "instructions": "string (or cardio/skipping instructions)"
+          }, // This object must be null if Conditioning Preference is 'None'
           "exercises": [
             {
               "name": "string",
