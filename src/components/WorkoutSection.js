@@ -456,11 +456,11 @@ export default function WorkoutSection({
         
         return (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
               <button
                 type="button"
                 onClick={() => setSelectedExercise(null)}
-                className="absolute top-4 right-4 text-zinc-450 hover:text-white text-xl font-bold cursor-pointer"
+                className="absolute top-4 right-4 text-zinc-450 hover:text-white text-xl font-bold cursor-pointer z-10"
               >
                 ✕
               </button>
