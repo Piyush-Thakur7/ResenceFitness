@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 export default function Dashboard({
   profile,
@@ -11,6 +11,11 @@ export default function Dashboard({
   dietPlan = null,
   sleepLog = null,
 }) {
+  const [clientToday, setClientToday] = useState('');
+  useEffect(() => {
+    setClientToday(new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase());
+  }, []);
+
   // 1. BMI Calculation
   const bmiData = useMemo(() => {
     if (!profile.weight || !profile.height) return { bmi: 0, category: 'N/A', color: 'text-zinc-400' };
@@ -34,8 +39,8 @@ export default function Dashboard({
 
   // 2. Workout Completion Rate for today
   const workoutCompletion = useMemo(() => {
-    if (!workoutPlan) return { total: 0, completed: 0, percentage: 0 };
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    if (!workoutPlan || !clientToday) return { total: 0, completed: 0, percentage: 0 };
+    const today = clientToday;
     
     // Find matching day in plan
     const daysKeyMap = {

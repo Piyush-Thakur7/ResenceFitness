@@ -67,6 +67,17 @@ export default function Home() {
     }
   }, []);
 
+  // Safety Liveness Timeout to prevent permanent stuck loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn('Resence: Liveness timeout triggered. Force resolving loading state.');
+        setLoading(false);
+      }
+    }, 4000); // 4.0 seconds safety net
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   // 2. Auth Session Management
   useEffect(() => {
     if (demoMode) {
@@ -90,6 +101,9 @@ export default function Home() {
       } else {
         setLoading(false);
       }
+    }).catch(err => {
+      console.error('Supabase getSession failed:', err);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {

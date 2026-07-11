@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -101,12 +101,15 @@ export default function WorkoutSection({
   onGeneratePlan,
   loading = false,
 }) {
-  const getTodayDay = () => {
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-    return DAYS_OF_WEEK.includes(today) ? today : 'monday';
-  };
+  const [activeDay, setActiveDay] = useState('monday');
 
-  const [activeDay, setActiveDay] = useState(getTodayDay());
+  // Set active tab on mount to prevent hydration timezone mismatch
+  useEffect(() => {
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    if (DAYS_OF_WEEK.includes(today)) {
+      setActiveDay(today);
+    }
+  }, []);
   const [selectedExercise, setSelectedExercise] = useState(null);
 
   const currentDayPlan = workoutPlan?.plan_data?.days?.[activeDay] || workoutPlan?.plan_data?.[activeDay] || null;
