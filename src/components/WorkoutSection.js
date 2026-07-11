@@ -24,8 +24,67 @@ export default function WorkoutSection({
   const currentDayPlan = workoutPlan?.plan_data?.days?.[activeDay] || workoutPlan?.plan_data?.[activeDay] || null;
 
   // Render MuscleWiki link helper
-  const getMuscleWikiLink = (exerciseName) => {
-    return `https://www.google.com/search?q=site%3Amusclewiki.com+${encodeURIComponent(exerciseName)}`;
+  const getMuscleWikiLink = (exerciseName, muscleGroup) => {
+    const nameLower = exerciseName.toLowerCase().trim();
+    const muscleLower = (muscleGroup || '').toLowerCase().trim();
+
+    const exactMatches = {
+      'standing dumbbell shoulder press': 'https://musclewiki.com/dumbbells/shoulders/dumbbell-shoulder-press',
+      'dumbbell shoulder press': 'https://musclewiki.com/dumbbells/shoulders/dumbbell-shoulder-press',
+      'lateral raises': 'https://musclewiki.com/dumbbells/shoulders/dumbbell-lateral-raise',
+      'dumbbell lateral raise': 'https://musclewiki.com/dumbbells/shoulders/dumbbell-lateral-raise',
+      'incline dumbbell press': 'https://musclewiki.com/dumbbells/chest/dumbbell-incline-chest-press',
+      'flat barbell bench press': 'https://musclewiki.com/barbell/chest/barbell-bench-press',
+      'barbell bench press': 'https://musclewiki.com/barbell/chest/barbell-bench-press',
+      'overhead cable tricep extension': 'https://musclewiki.com/cables/triceps/cable-overhead-triceps-extension',
+      'lat pulldown (wide grip)': 'https://musclewiki.com/cables/lats/cable-lat-pulldown',
+      'lat pulldown': 'https://musclewiki.com/cables/lats/cable-lat-pulldown',
+      'single-arm dumbbell row': 'https://musclewiki.com/dumbbells/lats/dumbbell-row',
+      'incline dumbbell bicep curl': 'https://musclewiki.com/dumbbells/biceps/dumbbell-incline-bicep-curl',
+      'leg extensions (quad focus)': 'https://musclewiki.com/machines/quads/machine-leg-extension',
+      'leg extensions': 'https://musclewiki.com/machines/quads/machine-leg-extension',
+      'seated leg curl (hamstrings)': 'https://musclewiki.com/machines/hamstrings/machine-seated-leg-curl',
+      'seated leg curl': 'https://musclewiki.com/machines/hamstrings/machine-seated-leg-curl',
+      'military press': 'https://musclewiki.com/barbell/shoulders/barbell-overhead-press',
+      'hanging leg raise': 'https://musclewiki.com/bodyweight/abdominals/hanging-leg-raise',
+      'tricep rope pushdowns': 'https://musclewiki.com/cables/triceps/cable-pushdown',
+      'hammer curls': 'https://musclewiki.com/dumbbells/biceps/dumbbell-hammer-curl',
+    };
+
+    // Check manual mappings first
+    for (const key in exactMatches) {
+      if (nameLower.includes(key)) {
+        return exactMatches[key];
+      }
+    }
+
+    // Fallback category construction
+    let category = 'bodyweight';
+    if (nameLower.includes('dumbbell')) category = 'dumbbells';
+    else if (nameLower.includes('barbell')) category = 'barbell';
+    else if (nameLower.includes('cable')) category = 'cables';
+    else if (nameLower.includes('kettlebell')) category = 'kettlebells';
+    else if (nameLower.includes('machine')) category = 'machines';
+    else if (nameLower.includes('stretch') || nameLower.includes('stretching')) category = 'stretch';
+
+    let muscle = 'shoulders';
+    if (muscleLower.includes('chest')) muscle = 'chest';
+    else if (muscleLower.includes('back') || muscleLower.includes('lat')) muscle = 'lats';
+    else if (muscleLower.includes('bicep')) muscle = 'biceps';
+    else if (muscleLower.includes('tricep')) muscle = 'triceps';
+    else if (muscleLower.includes('quad') || muscleLower.includes('leg') || muscleLower.includes('thigh')) muscle = 'quads';
+    else if (muscleLower.includes('hamstring')) muscle = 'hamstrings';
+    else if (muscleLower.includes('calf') || muscleLower.includes('calves')) muscle = 'calves';
+    else if (muscleLower.includes('glute')) muscle = 'glutes';
+    else if (muscleLower.includes('core') || muscleLower.includes('abdom') || muscleLower.includes('abs')) muscle = 'abdominals';
+
+    const cleanName = exerciseName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+
+    return `https://musclewiki.com/${category}/${muscle}/${cleanName}`;
   };
 
   // Helper to check if an exercise is completed in logs
@@ -208,7 +267,7 @@ export default function WorkoutSection({
 
                           {/* MuscleWiki Search Button */}
                           <a
-                            href={getMuscleWikiLink(ex.name)}
+                            href={getMuscleWikiLink(ex.name, ex.muscle)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-shrink-0 text-xs bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors"
