@@ -1216,7 +1216,7 @@ function getMockWorkoutPlan(profile) {
 }
 
 function getMockDietPlan(profile) {
-  const isVeg = ['Veg', 'Vegan'].includes(profile.diet_preference);
+  const pref = profile.diet_preference || 'Non-Veg';
   const isBulky = profile.fitness_goal === 'Bulky';
   const isLean = profile.fitness_goal === 'Lean';
   const isFatLoss = profile.fitness_goal === 'Fat Loss';
@@ -1231,22 +1231,41 @@ function getMockDietPlan(profile) {
   }
 
   const vegMeals = {
+    breakfast: 'Oatmeal (80g) made with whole milk, scoop of whey protein, 1tbsp peanut butter, and 50g blueberries. (Est: 460 kcal, 34g protein)',
+    lunch: 'Brown rice (150g) with paneer cubes (150g) cooked in olive oil, steamed broccoli, and mixed greens. (Est: 610 kcal, 30g protein)',
+    dinner: 'Lentil spaghetti (100g) with high-protein marinara sauce, mushrooms, and spinach. (Est: 580 kcal, 32g protein)',
+    snack: 'Roasted chickpeas (50g) + 1 cup double-toned milk. (Est: 230 kcal, 16g protein)',
+  };
+
+  const veganMeals = {
     breakfast: 'Oatmeal (80g) made with unsweetened almond milk, scoop of soy protein isolate, 1tbsp almond butter, and 50g blueberries. (Est: 430 kcal, 32g protein)',
     lunch: 'Quinoa bowl (100g cooked) with air-fried firm tofu (150g), steamed broccoli, half avocado, and lemon tahini dressing. (Est: 560 kcal, 28g protein)',
     dinner: 'Lentil spaghetti with high-protein marinara sauce, mushrooms, spinach, and 2tbsp nutritional yeast. (Est: 610 kcal, 34g protein)',
-    snack: 'Mixed raw almonds (30g) + 1 cup soy milk or protein shake. (Est: 250 kcal, 26g protein)',
+    snack: 'Mixed raw almonds (30g) + 1 cup soy milk or pea protein shake. (Est: 250 kcal, 26g protein)',
+  };
+
+  const eggetarianMeals = {
+    breakfast: '3 egg whites scrambled, 2 slices whole wheat toast, 1tbsp peanut butter, half banana. (Est: 420 kcal, 26g protein)',
+    lunch: 'Brown rice (150g) with 3 whole boiled eggs, steamed spinach, roasted carrots, and 1tbsp olive oil. (Est: 590 kcal, 28g protein)',
+    dinner: 'Lentil soup (large bowl) with a side of dynamic egg scramble (2 eggs) and asparagus. (Est: 550 kcal, 32g protein)',
+    snack: 'Boiled egg whites (4 whites) with black pepper + cup of green tea. (Est: 120 kcal, 16g protein)',
   };
 
   const nonVegMeals = {
-    breakfast: '3 whole eggs + 3 egg whites scrambled, 2 slices whole wheat toast, half avocado. (Est: 490 kcal, 36g protein)',
+    breakfast: '3 whole eggs scrambled, 2 slices whole wheat toast, half avocado. (Est: 490 kcal, 36g protein)',
     lunch: 'Grilled chicken breast (150g) with jasmine rice (150g cooked), roasted asparagus, and 1tbsp olive oil. (Est: 580 kcal, 44g protein)',
     dinner: 'Pan-seared salmon fillet (150g) with sweet potato mash (150g), steamed spinach, and garlic butter. (Est: 640 kcal, 38g protein)',
     snack: 'Whey protein shake (1 scoop) with Greek yogurt (150g) and honey. (Est: 260 kcal, 30g protein)',
   };
 
+  let chosenMeals = nonVegMeals;
+  if (pref === 'Veg') chosenMeals = vegMeals;
+  else if (pref === 'Vegan') chosenMeals = veganMeals;
+  else if (pref === 'Eggetarian') chosenMeals = eggetarianMeals;
+
   return {
     daily_targets: targets,
-    meal_suggestions: isVeg ? vegMeals : nonVegMeals,
+    meal_suggestions: chosenMeals,
   };
 }
 

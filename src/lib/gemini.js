@@ -105,9 +105,13 @@ export async function generateDietPlan(profile) {
     1. Calculate daily targets for: Calories (kcal), Protein (g), Carbs (g), and Fat (g).
     2. Daily targets should be optimized for their goal:
        - Bulky: Higher calorie surplus, high protein (1.6g - 2.2g per kg bodyweight).
-       - Lean: Calorie deficit, high protein to preserve muscle.
+       - Lean / Fat Loss: Calorie deficit, high protein to preserve muscle and target fat oxidation.
        - Athletic / Healthy: Balanced macros.
-    3. Generate meal suggestions for: Breakfast, Lunch, Dinner, Snack that align with their Diet Preference (${profile.diet_preference}).
+    3. Generate meal suggestions for: Breakfast, Lunch, Dinner, Snack that align STRICTLY with their Diet Preference (${profile.diet_preference}):
+       - If preference is "Veg": No meat, poultry, fish, seafood, or eggs. Dairy (milk, paneer, cheese) is allowed.
+       - If preference is "Vegan": Strictly plant-based. No dairy, no eggs, no meat, no fish, no animal products.
+       - If preference is "Eggetarian": Vegetarian but eggs are allowed. No meat, poultry, fish, or seafood.
+       - If preference is "Non-Veg": All options (chicken, fish, eggs, meat, dairy) are allowed.
     4. Provide the result in JSON format matching this schema:
     {
       "daily_targets": {
