@@ -53,10 +53,12 @@ export default function Home() {
   useEffect(() => {
     const isMockUrl =
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder-project');
+      process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder-project') ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-supabase-project');
     const isMockKey =
       !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('placeholder-anon-key');
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('placeholder-anon-key') ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.includes('your-supabase-anon-key');
 
     if (isMockUrl || isMockKey) {
       setDemoMode(true);
