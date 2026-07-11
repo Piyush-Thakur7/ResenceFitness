@@ -21,6 +21,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   
   // App navigation
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -611,90 +612,277 @@ export default function Home() {
     );
   }
 
-  // Auth Screen View
+  // Auth Screen View (Landing Page for Public Users)
   if (!session) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center items-center px-4 py-12">
-        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-6 shadow-xl relative overflow-hidden">
-          {/* Accent Glow */}
-          <div className="absolute -top-12 -right-12 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-800 shadow-md">
-              <span className="text-2xl font-black text-white">R</span>
+      <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans relative overflow-x-hidden">
+        {/* Decorative Background Glows */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Navbar */}
+        <header className="bg-zinc-900/40 backdrop-blur-md border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 flex items-center justify-center">
+              <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Resence Fitness</h1>
-            <p className="text-zinc-400 text-xs mt-1">Adaptive AI workout, nutrition & recovery client.</p>
+            <div>
+              <span className="font-extrabold tracking-tight text-white block">Resence Fitness</span>
+              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-widest mt-0.5">Gemini 3.5 Client</span>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsSignUp(false);
+              setShowAuthModal(true);
+            }}
+            className="text-xs text-zinc-300 hover:text-white font-semibold px-4 py-2 border border-zinc-800 hover:border-zinc-700 bg-zinc-950 rounded-lg transition-colors cursor-pointer"
+          >
+            Sign In
+          </button>
+        </header>
+
+        {/* Hero Section */}
+        <section className="flex-1 max-w-5xl mx-auto px-6 py-12 md:py-20 flex flex-col md:flex-row items-center gap-12 relative z-10">
+          <div className="flex-1 space-y-6 text-center md:text-left">
+            <span className="inline-block text-xs bg-orange-950/40 text-orange-400 border border-orange-900 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+              ✨ Intelligent Adaptive Coach
+            </span>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight text-white">
+              Your body is dynamic.<br/>
+              <span className="bg-gradient-to-r from-orange-500 to-green-500 bg-clip-text text-transparent">
+                Your plan should be too.
+              </span>
+            </h1>
+            <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+              Resence is a personalized fitness tracking client. It uses the Gemini 3.5 Flash model to compile adaptive weekly workout and nutrition plans, critique body assessments from physique photos, and parse daily meal macros.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
+              <button
+                onClick={() => {
+                  setIsSignUp(true);
+                  setShowAuthModal(true);
+                }}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition-colors cursor-pointer"
+              >
+                Start Your Assessment
+              </button>
+              <a
+                href="#features"
+                className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 font-semibold px-6 py-3.5 rounded-xl transition-colors text-center"
+              >
+                Explore Features
+              </a>
+            </div>
           </div>
 
-          {authError && (
-            <div className="p-3 bg-red-950 border border-red-900 text-red-300 text-xs rounded-lg text-center">
-              {authError}
-            </div>
-          )}
-
-          {demoMode && (
-            <div className="p-3 bg-orange-950/20 border border-orange-900/50 text-orange-400 text-[11px] rounded-lg text-center leading-relaxed">
-              ⚡ Demo mode activated. Use any email and password to sign in immediately without checking live databases.
-            </div>
-          )}
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            {isSignUp && (
-              <div>
-                <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Alex Carter"
-                  value={authName}
-                  onChange={(e) => setAuthName(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-orange-500"
-                  required
-                />
+          {/* Hero Visual Mockup */}
+          <div className="flex-1 w-full max-w-md bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 shadow-2xl relative space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
+              <div className="flex items-center space-x-2">
+                <div className="w-2.5 h-2.5 bg-red-500/60 rounded-full" />
+                <div className="w-2.5 h-2.5 bg-yellow-500/60 rounded-full" />
+                <div className="w-2.5 h-2.5 bg-green-500/60 rounded-full" />
               </div>
-            )}
-
-            <div>
-              <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Email Address</label>
-              <input
-                type="email"
-                placeholder="you@domain.com"
-                value={authEmail}
-                onChange={(e) => setAuthEmail(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-orange-500"
-                required
-              />
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Client Dashboard</span>
             </div>
 
-            <div>
-              <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={authPassword}
-                onChange={(e) => setAuthPassword(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-orange-500"
-                required
-              />
+            <div className="space-y-3">
+              <div className="flex justify-between items-center bg-zinc-950 p-3 rounded-lg border border-zinc-850">
+                <div>
+                  <span className="text-[9px] text-zinc-500 uppercase font-bold block">Current BMI</span>
+                  <span className="text-lg font-black text-white">24.7</span>
+                </div>
+                <span className="text-[10px] text-green-500 bg-green-950/20 border border-green-900/50 px-2 py-0.5 rounded-full font-semibold">Normal weight</span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-zinc-400">Calories Consumed</span>
+                  <span className="text-zinc-500">1800 / 2200 kcal</span>
+                </div>
+                <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
+                  <div className="bg-orange-500 h-full w-[80%] rounded-full" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px]">
+                  <span className="text-zinc-400">Protein Target</span>
+                  <span className="text-zinc-500">120 / 140g</span>
+                </div>
+                <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
+                  <div className="bg-green-500 h-full w-[85%] rounded-full" />
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-zinc-850 flex justify-between items-center text-xs">
+                <span className="text-zinc-400">Active Logging Streak</span>
+                <span className="font-bold text-orange-500">🔥 7 Days</span>
+              </div>
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
-            >
-              {isSignUp ? 'Register Account' : 'Sign In'}
-            </button>
-          </form>
-
-          <div className="text-center pt-2">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-xs text-zinc-400 hover:text-orange-500 transition-colors"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </button>
           </div>
-        </div>
+        </section>
+
+        {/* Features Section */}
+        <section id="features" className="bg-zinc-900/30 border-t border-zinc-900 px-6 py-16 relative z-10">
+          <div className="max-w-5xl mx-auto space-y-12">
+            <div className="text-center space-y-4 max-w-2xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-white">Packed with Elite AI Capabilities</h2>
+              <p className="text-zinc-400 text-sm">Everything you need to maintain consistency, adapt intensities, and achieve your targets in one low-friction dashboard.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Feature 1 */}
+              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
+                <div className="w-10 h-10 bg-orange-950/40 border border-orange-900/50 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-white text-base">AI Body Photo Assessment</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Upload front or side physique photos securely. Gemini Vision critiques chest/shoulder alignment, calculates muscle gaps, and logs historical progress curves.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
+                <div className="w-10 h-10 bg-green-950/40 border border-green-900/50 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-white text-base">Adaptive Workout Routines</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Weekly active workout plans that automatically adjust. If you consistently tick exercises off, intensity climbs. If you miss days, it adapts to a realistic volume.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
+                <div className="w-10 h-10 bg-blue-950/40 border border-blue-900/50 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-white text-base">Food Photo Recognition</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Simply take a photo of your meal. Gemini analyzes the food structure, estimates carbs/protein/fat macros, and pre-populates your logging form for one-tap log entries.
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
+                <div className="w-10 h-10 bg-purple-950/40 border border-purple-900/50 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-white text-base">Sleep & Recovery Logs</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">
+                  Tailored rest targets based on your training workload. Log sleep times to verify muscle fiber replenishment and optimize HGH hormone release.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-zinc-900 bg-zinc-950 px-6 py-6 text-center text-xs text-zinc-600">
+          <p>© {new Date().getFullYear()} Resence Fitness. All rights reserved.</p>
+        </footer>
+
+        {/* Login / Sign Up Overlay Modal */}
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <div className="text-center">
+                <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-green-500 rounded-xl flex items-center justify-center mx-auto mb-3 border border-zinc-800 shadow-md">
+                  <span className="text-xl font-black text-white">R</span>
+                </div>
+                <h1 className="text-xl font-bold text-white tracking-tight">Resence Fitness Account</h1>
+                <p className="text-zinc-400 text-[10px] mt-1">Sign in to sync your adaptive baseline configuration.</p>
+              </div>
+
+              {authError && (
+                <div className="p-3 bg-red-950 border border-red-900 text-red-300 text-xs rounded-lg text-center">
+                  {authError}
+                </div>
+              )}
+
+              {demoMode && (
+                <div className="p-3 bg-orange-950/20 border border-orange-900/50 text-orange-400 text-[10px] rounded-lg text-center leading-relaxed">
+                  ⚡ Demo mode active. Input any email/password to log in immediately.
+                </div>
+              )}
+
+              <form onSubmit={handleAuth} className="space-y-4">
+                {isSignUp && (
+                  <div>
+                    <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Alex Carter"
+                      value={authName}
+                      onChange={(e) => setAuthName(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                      required
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="you@domain.com"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Password</label>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-lg text-xs transition-colors cursor-pointer"
+                >
+                  {isSignUp ? 'Register Account' : 'Sign In'}
+                </button>
+              </form>
+
+              <div className="text-center pt-1 border-t border-zinc-850">
+                <button
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-xs text-zinc-400 hover:text-orange-500 transition-colors"
+                >
+                  {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
