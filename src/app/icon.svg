@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="glowOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b35" />
+      <stop offset="100%" stop-color="#ea580c" />
+    </linearGradient>
+    <linearGradient id="glowGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <!-- Stylized energy brand mark forming an 'R' swoosh -->
+  <path d="M7 6 C7 6, 9 17, 9 26" stroke="url(#glowOrange)" stroke-width="3" stroke-linecap="round" fill="none" />
+  <path d="M7 8 C15 5, 23 11, 14 17 C22 20, 24 23, 25 26" stroke="url(#glowOrange)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <path d="M12 17 C16 17, 23 15, 24 8" stroke="url(#glowGreen)" stroke-width="2.5" stroke-linecap="round" fill="none" />
+</svg>
