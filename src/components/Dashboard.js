@@ -26,7 +26,7 @@ export default function Dashboard({
       const todayStr = new Date().toISOString().split('T')[0];
       const val = localStorage.getItem(`water_${profile.id}_${todayStr}`);
       if (val) {
-        setWaterIntake(parseInt(val));
+        setWaterIntake(parseInt(val) || 0);
       } else {
         setWaterIntake(0);
       }
@@ -35,7 +35,8 @@ export default function Dashboard({
 
   const handleLogWater = (amount) => {
     const todayStr = new Date().toISOString().split('T')[0];
-    const newAmount = waterIntake + amount;
+    const current = parseInt(waterIntake) || 0;
+    const newAmount = current + amount;
     setWaterIntake(newAmount);
     localStorage.setItem(`water_${profile.id}_${todayStr}`, newAmount.toString());
   };
@@ -410,12 +411,16 @@ export default function Dashboard({
             <div className="space-y-2 mt-2">
               <div className="flex justify-between text-xs">
                 <span className="text-zinc-400">Hydration progress</span>
-                <span className="font-semibold text-orange-400">{waterIntake} / {waterTarget} ml</span>
+                <span className={`font-semibold ${waterIntake >= waterTarget ? 'text-green-400' : 'text-orange-400'}`}>
+                  {waterIntake} / {waterTarget} ml
+                </span>
               </div>
               <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
                 <div
-                  className="bg-orange-500 h-full rounded-full transition-all duration-300"
-                  style={{ width: `${Math.min((waterIntake / waterTarget) * 100, 100)}%` }}
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    waterIntake >= waterTarget ? 'bg-green-500 shadow-sm shadow-green-500/20' : 'bg-orange-500'
+                  }`}
+                  style={{ width: `${Math.min((Number(waterIntake) / Number(waterTarget || 1)) * 100, 100)}%` }}
                 />
               </div>
             </div>

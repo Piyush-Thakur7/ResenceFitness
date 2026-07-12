@@ -202,8 +202,16 @@ export default function MuscleExplorer({ profile }) {
               return (
                 <button
                   key={ex.name}
-                  onClick={() => setActiveExercise(ex)}
-                  className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all cursor-pointer block ${active ? 'bg-orange-500/10 border-orange-500 text-white font-bold' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-300'}`}
+                  type="button"
+                  onClick={() => {
+                    console.log('Selecting active exercise:', ex.name);
+                    setActiveExercise(ex);
+                  }}
+                  className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all cursor-pointer block ${
+                    active 
+                      ? 'bg-orange-500/10 border-orange-500 text-white font-bold shadow-sm shadow-orange-500/5' 
+                      : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                  }`}
                 >
                   <span className="block">{ex.name}</span>
                   <span className="text-[10px] text-zinc-500 font-medium block mt-0.5">Equip: {ex.equipment} | Target: {ex.target}</span>
