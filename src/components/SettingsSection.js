@@ -395,6 +395,8 @@ export default function SettingsSection({
                     </select>
                   </div>
                 </div>
+              </div>
+            )}
           </div>
 
           {/* Account Administration */}
