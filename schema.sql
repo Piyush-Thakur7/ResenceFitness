@@ -220,3 +220,16 @@ create policy "Allow authenticated delete of meal photos" on storage.objects
     bucket_id = 'meal-photos' AND
     (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- =========================================================================
+-- Database Performance Optimization Indexes
+-- =========================================================================
+
+-- Index user query criteria to prevent sequential table scans
+create index if not exists idx_weight_history_user_id on public.weight_history(user_id);
+create index if not exists idx_workout_plans_user_id on public.workout_plans(user_id);
+create index if not exists idx_workout_logs_user_id_date on public.workout_logs(user_id, date);
+create index if not exists idx_diet_plans_user_id on public.diet_plans(user_id);
+create index if not exists idx_diet_logs_user_id_date on public.diet_logs(user_id, date);
+create index if not exists idx_sleep_logs_user_id_date on public.sleep_logs(user_id, date);
+create index if not exists idx_body_assessments_user_id on public.body_assessments(user_id);

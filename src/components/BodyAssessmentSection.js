@@ -29,6 +29,47 @@ export default function BodyAssessmentSection({
     setPreviews(filePreviews);
   };
 
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        const maxSide = 1200;
+        if (width > height && width > maxSide) {
+          height = Math.round((height * maxSide) / width);
+          width = maxSide;
+        } else if (height > maxSide) {
+          width = Math.round((width * maxSide) / height);
+          height = maxSide;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Image compression failed.'));
+            return;
+          }
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result.split(',')[1]);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = () => {
+        reject(new Error('Failed to read image. Make sure file is not corrupted.'));
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedFiles.length === 0) {
@@ -38,17 +79,10 @@ export default function BodyAssessmentSection({
 
     setError('');
     
-    // Read files as base64
+    // Read and compress files
     try {
       const base64Files = await Promise.all(
-        selectedFiles.map((file) => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        })
+        selectedFiles.map((file) => compressImage(file))
       );
 
       // Call parent handler
@@ -58,7 +92,7 @@ export default function BodyAssessmentSection({
       setSelectedFiles([]);
       setPreviews([]);
     } catch (err) {
-      console.error('File parsing failed:', err);
+      console.error('File compression/parsing failed:', err);
       setError('Failed to process photos. Please try again.');
     }
   };
