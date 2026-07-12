@@ -261,7 +261,6 @@ export default function DietSection({
 
     // Canvas-based image compression (max 1200px longest side, target <500KB)
     const img = new Image();
-    img.src = URL.createObjectURL(targetFile);
     img.onload = () => {
       let width = img.width;
       let height = img.height;
@@ -305,9 +304,10 @@ export default function DietSection({
       setPipelineStep('failed');
       setRetryAction(() => () => runCompression(file));
     };
+    img.src = URL.createObjectURL(targetFile);
   };
 
-  // 2. Storage Upload step with 10s Abort timeout and 1 auto-retry
+  // 2. Storage Upload step with 20s timeout and 1 auto-retry
   const runUpload = async (blob, base64, isRetry = false) => {
     setPipelineStep('upload');
     setPipelineError(null);
@@ -319,33 +319,45 @@ export default function DietSection({
       return;
     }
 
-    const filePath = `${profile.id}/meal_${Date.now()}.jpg`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+    if (!profile?.id) {
+      setPipelineError('User profile not loaded. Please reload and try again.');
+      setPipelineStep('failed');
+      return;
+    }
 
-    try {
+    const filePath = `${profile.id}/meal_${Date.now()}.jpg`;
+
+    // 20-second timeout promise
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Upload timed out due to slow network')), 20000)
+    );
+
+    // Supabase upload promise
+    const uploadPromise = (async () => {
       const { data, error } = await supabase.storage
         .from('meal-photos')
         .upload(filePath, blob, {
           contentType: 'image/jpeg',
           upsert: true
         });
-      
-      clearTimeout(timeoutId);
       if (error) throw error;
+      return data;
+    })();
 
+    try {
+      const data = await Promise.race([uploadPromise, timeoutPromise]);
       setUploadedPath(data.path);
       // Proceed to analyze
       runAnalysis(base64, data.path);
     } catch (err) {
-      clearTimeout(timeoutId);
       console.error('Upload failed:', err);
+      const errMsg = err.message || 'Upload failed';
 
       if (!isRetry) {
         console.log('Retrying upload once...');
         runUpload(blob, base64, true);
       } else {
-        setPipelineError('Upload slow. Try again?');
+        setPipelineError(`${errMsg}. Try again?`);
         setPipelineStep('failed');
         setRetryAction(() => () => runUpload(blob, base64));
       }
