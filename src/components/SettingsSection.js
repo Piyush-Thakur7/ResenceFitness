@@ -39,6 +39,7 @@ export default function SettingsSection({
   assessments = [],
   onChooseLogo,
   selectedLogoId = '',
+  onLogout,
 }) {
   const [dob, setDob] = useState(profile.dob || '');
   const [gender, setGender] = useState(profile.gender || 'male');
@@ -394,8 +395,19 @@ export default function SettingsSection({
                     </select>
                   </div>
                 </div>
-              </div>
-            )}
+          </div>
+
+          {/* Account Administration */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
+            <h2 className="text-red-400 font-bold text-sm uppercase tracking-wider">Account Settings</h2>
+            <p className="text-xs text-zinc-400">Sign out of your session on this device. Your parameters will remain securely stored.</p>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="bg-red-950/20 border border-red-900/60 hover:bg-red-900/30 text-red-400 font-bold px-6 py-2.5 rounded-lg text-xs transition-colors cursor-pointer"
+            >
+              Sign Out of Resence
+            </button>
           </div>
         </div>
 
