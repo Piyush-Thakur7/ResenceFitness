@@ -102,6 +102,34 @@ export default function Dashboard({
     return ageVal;
   }, [profile.dob]);
 
+  // Target weight calculation based on height and fitness goal
+  const targetWeight = useMemo(() => {
+    if (!profile.weight || !profile.height) return 0;
+    const hMeters = profile.height / 100;
+    let targetBmi = 22.0;
+
+    switch (profile.fitness_goal) {
+      case 'Bulky':
+        targetBmi = 24.5;
+        break;
+      case 'Lean':
+        targetBmi = 21.5;
+        break;
+      case 'Athletic':
+        targetBmi = 22.8;
+        break;
+      case 'Fat Loss':
+        targetBmi = 21.0;
+        break;
+      case 'Healthy':
+      case 'General Fitness':
+      default:
+        targetBmi = 22.0;
+        break;
+    }
+    return Math.round(targetBmi * hMeters * hMeters);
+  }, [profile.height, profile.fitness_goal]);
+
   return (
     <div className="space-y-6">
       {/* Title greeting */}
@@ -127,17 +155,21 @@ export default function Dashboard({
             <span className={`text-sm font-semibold ${bmiData.color}`}>{bmiData.category} BMI</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-2 text-center">
+          <div className="grid grid-cols-2 gap-2 pt-2 text-center">
             <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-xs text-zinc-500 block">Height</span>
+              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Height</span>
               <span className="text-sm font-bold text-zinc-200">{profile.height} cm</span>
             </div>
             <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-xs text-zinc-500 block">Weight</span>
+              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Current</span>
               <span className="text-sm font-bold text-zinc-200">{profile.weight} kg</span>
             </div>
             <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-xs text-zinc-500 block">Age</span>
+              <span className="text-[10px] text-orange-400 block uppercase font-bold">Target Weight</span>
+              <span className="text-sm font-bold text-orange-500">{targetWeight} kg</span>
+            </div>
+            <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
+              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Age</span>
               <span className="text-sm font-bold text-zinc-200">{age} yrs</span>
             </div>
           </div>
