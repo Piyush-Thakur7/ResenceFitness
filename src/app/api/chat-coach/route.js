@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { chatWithCoach } from '@/lib/gemini';
 
+/**
+ * POST handler for AI Coach chat requests. Handles profile context injections.
+ * @param {Request} req - Next.js Request container.
+ * @returns {Promise<NextResponse>} Next.js JSON Response.
+ */
 export async function POST(req) {
   try {
     const { profile, messages } = await req.json();

@@ -9,6 +9,12 @@ const SUGGESTED_PROMPTS = [
   { text: 'Explain the benefits of dynamic warm-ups', icon: '🔥' },
 ];
 
+/**
+ * AICoachSection component rendering the chatbot interface.
+ * @param {Object} props - Component properties.
+ * @param {Object} props.profile - User profile metadata (goals, diet, injuries).
+ * @param {boolean} [props.demoMode=false] - Whether to bypass Gemini calls and use local responses.
+ */
 export default function AICoachSection({ profile, demoMode = false }) {
   const [messages, setMessages] = useState([
     {
