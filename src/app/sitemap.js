@@ -10,6 +10,5 @@ export default function sitemap() {
     { url: `${baseUrl}/features/sleep-recovery`, lastModified: new Date() },
     { url: `${baseUrl}/privacy-policy`, lastModified: new Date() },
     { url: `${baseUrl}/terms-of-service`, lastModified: new Date() },
-    { url: `${baseUrl}/cookie-policy`, lastModified: new Date() },
   ];
 }

@@ -153,22 +153,100 @@ export async function analyzeFoodPhoto(base64Image, mimeType = 'image/jpeg') {
   };
 
   const prompt = `
-    Analyze this photo of a meal. Estimate its nutritional value as accurately as possible.
+    Analyze this photo of a meal. Identify EACH individual food ingredient/item separately and estimate portion weight in grams and detailed nutrition metrics.
     
-    If the image is not food, return a dummy item with meal_name "Not identified as food" and 0 macros.
+    If the image is not food, return a dummy item with meal_name "Not identified as food" and an empty "items" list.
 
     Output the response in JSON format matching this schema:
     {
       "meal_name": "Name of the meal",
-      "calories": number,
-      "protein": number, -- in grams
-      "carbs": number, -- in grams
-      "fat": number -- in grams
+      "items": [
+        {
+          "name": "Name of individual food item (e.g. White Rice, Grilled Chicken Breast)",
+          "weight_g": number,
+          "calories": number,
+          "protein": number, -- in grams
+          "carbs": number, -- in grams
+          "fat": number, -- in grams
+          "fiber": number, -- in grams
+          "sodium": number, -- in milligrams
+          "sugar": number, -- in grams
+          "confidence": number -- float between 0.0 and 1.0 representing how confident you are in this item's identity
+        }
+      ],
+      "suggested_hidden_ingredients": [
+        {
+          "name": "Name of likely hidden ingredient (e.g. Cooking Oil, Butter, Salad Dressing)",
+          "default_amount": "e.g. 1 tbsp (14g)",
+          "calories": number,
+          "protein": number,
+          "carbs": number,
+          "fat": number,
+          "fiber": number,
+          "sodium": number,
+          "sugar": number
+        }
+      ]
     }
   `;
 
   const result = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }, imagePart] }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+    },
+  });
+
+  return JSON.parse(result.response.text());
+}
+
+/**
+ * Recognizes food from a text description (voice transcript fallback)
+ */
+export async function analyzeFoodText(description) {
+  const model = getModel();
+
+  const prompt = `
+    Analyze this text description of a meal: "${description}". 
+    Identify EACH individual food ingredient/item separately and estimate portion weight in grams and detailed nutrition metrics.
+    
+    If the description is not food, return a dummy item with meal_name "Not identified as food" and an empty "items" list.
+
+    Output the response in JSON format matching this schema:
+    {
+      "meal_name": "Name of the meal",
+      "items": [
+        {
+          "name": "Name of individual food item (e.g. White Rice, Grilled Chicken Breast)",
+          "weight_g": number,
+          "calories": number,
+          "protein": number, -- in grams
+          "carbs": number, -- in grams
+          "fat": number, -- in grams
+          "fiber": number, -- in grams
+          "sodium": number, -- in milligrams
+          "sugar": number, -- in grams
+          "confidence": number -- float between 0.0 and 1.0 representing how confident you are in this item's identity
+        }
+      ],
+      "suggested_hidden_ingredients": [
+        {
+          "name": "Name of likely hidden ingredient (e.g. Cooking Oil, Butter, Salad Dressing)",
+          "default_amount": "e.g. 1 tbsp (14g)",
+          "calories": number,
+          "protein": number,
+          "carbs": number,
+          "fat": number,
+          "fiber": number,
+          "sodium": number,
+          "sugar": number
+        }
+      ]
+    }
+  `;
+
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: 'application/json',
     },

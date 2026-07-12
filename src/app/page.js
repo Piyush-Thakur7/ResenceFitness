@@ -13,50 +13,6 @@ import MuscleExplorer from '@/components/MuscleExplorer';
 import AICoachSection from '@/components/AICoachSection';
 import SettingsSection from '@/components/SettingsSection';
 
-function CookieConsentBanner() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const consent = localStorage.getItem('cookie-consent');
-    if (!consent) {
-      setVisible(true);
-    }
-  }, []);
-
-  const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
-    setVisible(false);
-  };
-
-  if (!visible) return null;
-
-  return (
-    <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-50 animate-in slide-in-from-bottom duration-300">
-      <div className="bg-zinc-900/95 border border-zinc-800 backdrop-blur-xl p-4.5 rounded-2xl shadow-2xl flex flex-col gap-3">
-        <div className="space-y-1">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">🍪 Cookie Preferences</h4>
-          <p className="text-[11px] text-zinc-400 leading-normal">
-            This app uses session cookies for login only. No tracking, no analytics, no ads.
-          </p>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <Link
-            href="/cookie-policy"
-            className="text-[10px] text-zinc-400 hover:text-white font-semibold px-3 py-1.5 border border-zinc-850 hover:border-zinc-800 rounded-lg transition-colors"
-          >
-            Learn More
-          </Link>
-          <button
-            onClick={handleAccept}
-            className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
-          >
-            Accept
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const LOGO_OPTIONS = [
   { id: 'logo_1', title: 'Option 1: Stylized "R" Mark', path: '/logos/logo_1.jpg', desc: 'Modern energy swoosh forming the letter "R" with orange and green gradients.' },
@@ -548,17 +504,60 @@ export default function Home() {
     }
   };
 
-  // 8. Analyze Food photo
-  const handleAnalyzeFoodPhoto = async (base64Data, mimeType) => {
+  // 8. Analyze Food photo or text
+  const handleAnalyzeFoodPhoto = async (base64Data, mimeType, description = null) => {
     if (demoMode) {
-      // Mock recognition
+      // Mock itemized recognition for 2026 standards
       return new Promise((resolve) => {
         setTimeout(() => {
           const mockMealMap = {
-            Veg: { meal_name: 'Avocado Quinoa Salad', calories: 420, protein: 12, carbs: 46, fat: 20 },
-            Vegan: { meal_name: 'Tofu Broccoli Stir Fry', calories: 380, protein: 18, carbs: 32, fat: 14 },
-            Eggetarian: { meal_name: 'Feta Veggie Omelet', calories: 410, protein: 24, carbs: 8, fat: 31 },
-            'Non-Veg': { meal_name: 'Grilled Salmon with Brown Rice', calories: 540, protein: 36, carbs: 42, fat: 18 },
+            Veg: {
+              meal_name: 'Avocado Quinoa Salad',
+              items: [
+                { name: 'Quinoa (Cooked)', weight_g: 150, calories: 180, protein: 6, carbs: 32, fat: 3, fiber: 4, sodium: 5, sugar: 0, confidence: 0.95 },
+                { name: 'Fresh Avocado', weight_g: 80, calories: 128, protein: 1.5, carbs: 7, fat: 12, fiber: 5.4, sodium: 4, sugar: 0.5, confidence: 0.92 },
+                { name: 'Cherry Tomatoes', weight_g: 50, calories: 9, protein: 0.4, carbs: 2, fat: 0.1, fiber: 0.6, sodium: 2, sugar: 1.3, confidence: 0.89 }
+              ],
+              suggested_hidden_ingredients: [
+                { name: 'Olive Oil Dressing', default_amount: '1 tbsp (14g)', calories: 119, protein: 0, carbs: 0, fat: 13.5, fiber: 0, sodium: 0, sugar: 0 },
+                { name: 'Lemon Juice', default_amount: '1 tsp (5g)', calories: 1, protein: 0, carbs: 0.1, fat: 0, fiber: 0, sodium: 0, sugar: 0.1 }
+              ]
+            },
+            Vegan: {
+              meal_name: 'Tofu Broccoli Stir Fry',
+              items: [
+                { name: 'Firm Tofu', weight_g: 120, calories: 98, protein: 10, carbs: 2.5, fat: 5.5, fiber: 1.1, sodium: 8, sugar: 0.5, confidence: 0.94 },
+                { name: 'Broccoli Florets', weight_g: 100, calories: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6, sodium: 33, sugar: 1.7, confidence: 0.91 },
+                { name: 'Brown Rice (Cooked)', weight_g: 120, calories: 156, protein: 3.2, carbs: 32, fat: 1.2, fiber: 2.2, sodium: 4, sugar: 0.3, confidence: 0.96 }
+              ],
+              suggested_hidden_ingredients: [
+                { name: 'Sesame Oil', default_amount: '1 tsp (5g)', calories: 45, protein: 0, carbs: 0, fat: 5, fiber: 0, sodium: 0, sugar: 0 },
+                { name: 'Soy Sauce', default_amount: '1 tbsp (15g)', calories: 10, protein: 1.3, carbs: 1.0, fat: 0.1, fiber: 0.1, sodium: 879, sugar: 0.1 }
+              ]
+            },
+            Eggetarian: {
+              meal_name: 'Feta Veggie Omelet',
+              items: [
+                { name: 'Whole Chicken Eggs', weight_g: 120, calories: 172, protein: 14.2, carbs: 1.1, fat: 12.1, fiber: 0, sodium: 160, sugar: 1.0, confidence: 0.97 },
+                { name: 'Feta Cheese', weight_g: 30, calories: 80, protein: 4.2, carbs: 1.2, fat: 6.4, fiber: 0, sodium: 335, sugar: 0.3, confidence: 0.93 },
+                { name: 'Bell Peppers', weight_g: 50, calories: 15, protein: 0.5, carbs: 3.2, fat: 0.1, fiber: 1.1, sodium: 2, sugar: 2.1, confidence: 0.87 }
+              ],
+              suggested_hidden_ingredients: [
+                { name: 'Salted Butter (for pan)', default_amount: '1 tsp (5g)', calories: 36, protein: 0, carbs: 0, fat: 4.1, fiber: 0, sodium: 41, sugar: 0 }
+              ]
+            },
+            'Non-Veg': {
+              meal_name: 'Grilled Salmon with Brown Rice',
+              items: [
+                { name: 'Salmon Fillet', weight_g: 150, calories: 312, protein: 33, carbs: 0, fat: 19, fiber: 0, sodium: 88, sugar: 0, confidence: 0.98 },
+                { name: 'Brown Rice (Cooked)', weight_g: 120, calories: 156, protein: 3.2, carbs: 32, fat: 1.2, fiber: 2.2, sodium: 4, sugar: 0.3, confidence: 0.96 },
+                { name: 'Asparagus Spears', weight_g: 80, calories: 16, protein: 1.7, carbs: 3.1, fat: 0.1, fiber: 1.7, sodium: 2, sugar: 1.5, confidence: 0.90 }
+              ],
+              suggested_hidden_ingredients: [
+                { name: 'Olive Oil', default_amount: '1 tsp (5g)', calories: 45, protein: 0, carbs: 0, fat: 5, fiber: 0, sodium: 0, sugar: 0 },
+                { name: 'Table Salt', default_amount: '1/4 tsp', calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sodium: 580, sugar: 0 }
+              ]
+            },
           };
           resolve(mockMealMap[profile.diet_preference] || mockMealMap['Non-Veg']);
         }, 1200);
@@ -568,7 +567,7 @@ export default function Home() {
     const res = await fetch('/api/analyze-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64Data, mimeType }),
+      body: JSON.stringify({ image: base64Data, mimeType, description }),
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -792,7 +791,7 @@ export default function Home() {
                 setIsSignUp(true);
                 setShowAuthModal(true);
               }}
-              className="bg-gradient-to-r from-orange-500 to-purple-500 hover:from-orange-600 hover:to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md shadow-orange-500/10 cursor-pointer uppercase tracking-wider"
+              className="bg-orange-500 hover:bg-orange-600 text-black text-xs font-black px-4 py-2 rounded-xl transition-all shadow-md shadow-orange-500/10 cursor-pointer uppercase tracking-wider"
             >
               Get Started
             </button>
@@ -822,7 +821,7 @@ export default function Home() {
                 setIsSignUp(true);
                 setShowAuthModal(true);
               }}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 transition-all cursor-pointer uppercase tracking-wider text-xs"
+              className="bg-orange-500 hover:bg-orange-600 text-black text-xs font-black px-8 py-3.5 rounded-xl shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 transition-all cursor-pointer uppercase tracking-wider"
             >
               Get Started
             </button>
@@ -943,7 +942,6 @@ export default function Home() {
               <ul className="space-y-2 text-zinc-500 font-medium">
                 <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
@@ -951,7 +949,7 @@ export default function Home() {
           {/* Bottom Bar */}
           <div className="max-w-5xl mx-auto pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-zinc-600 font-bold uppercase tracking-wider">
             <span>© {new Date().getFullYear()} Resence Fitness. All rights reserved.</span>
-            <span>Made with 💪 and 🤖</span>
+            <span>Designed and built for personal performance.</span>
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="text-zinc-500 hover:text-white transition-colors cursor-pointer flex items-center space-x-1"
@@ -963,9 +961,6 @@ export default function Home() {
             </button>
           </div>
         </footer>
-
-        {/* Cookie Consent Banner */}
-        <CookieConsentBanner />
 
         {/* Login / Sign Up Overlay Modal */}
         {showAuthModal && (
