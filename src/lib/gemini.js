@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY;
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash';
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
 
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
