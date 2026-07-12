@@ -868,60 +868,52 @@ export default function Home() {
           <div className="space-y-12">
             <div className="text-center space-y-4 max-w-2xl mx-auto">
               <span className="text-[10px] text-orange-400 font-bold uppercase tracking-widest block">Complete Core Suite</span>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mt-1">Packed with Elite AI Capabilities</h2>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mt-1 font-display">Packed with Elite AI Capabilities</h2>
               <p className="text-zinc-400 text-xs">Everything you need to maintain consistency, adapt intensities, and achieve your targets in one personal dashboard.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Feature 1 */}
-              <Link href="/features/body-assessment" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
-                <div className="w-10 h-10 bg-orange-950/40 border border-orange-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors">AI Body Photo Assessment</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">
+              <Link href="/features/body-assessment" className="stripe-card p-6 block group cursor-pointer space-y-3">
+                <svg className="w-6 h-6 text-orange-500/80 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors font-display">AI Body Photo Assessment</h3>
+                <p className="text-zinc-450 text-xs leading-relaxed font-light">
                   Upload front or side physique photos securely. Gemini Vision critiques chest/shoulder alignment, calculates muscle gaps, and logs historical progress curves.
                 </p>
               </Link>
 
               {/* Feature 2 */}
-              <Link href="/features/ai-workout-plans" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
-                <div className="w-10 h-10 bg-green-950/40 border border-green-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-white text-base group-hover:text-green-400 transition-colors">Adaptive Workout Routines</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">
+              <Link href="/features/ai-workout-plans" className="stripe-card p-6 block group cursor-pointer space-y-3">
+                <svg className="w-6 h-6 text-orange-500/80 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
+                </svg>
+                <h3 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors font-display">Adaptive Workout Routines</h3>
+                <p className="text-zinc-450 text-xs leading-relaxed font-light">
                   Weekly active workout plans that automatically adjust. If you consistently tick exercises off, intensity climbs. If you miss days, it adapts to a realistic volume.
                 </p>
               </Link>
 
               {/* Feature 3 */}
-              <Link href="/features/nutrition-tracking" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
-                <div className="w-10 h-10 bg-blue-950/40 border border-blue-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-white text-base group-hover:text-blue-400 transition-colors">Food Photo Recognition</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">
+              <Link href="/features/nutrition-tracking" className="stripe-card p-6 block group cursor-pointer space-y-3">
+                <svg className="w-6 h-6 text-orange-500/80 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707" />
+                </svg>
+                <h3 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors font-display">Food Photo Recognition</h3>
+                <p className="text-zinc-450 text-xs leading-relaxed font-light">
                   Simply take a photo of your meal. Gemini analyzes the food structure, estimates carbs/protein/fat macros, and pre-populates your logging form for one-tap log entries.
                 </p>
               </Link>
 
               {/* Feature 4 */}
-              <Link href="/features/sleep-recovery" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
-                <div className="w-10 h-10 bg-purple-950/40 border border-purple-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <svg className="w-5 h-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-white text-base group-hover:text-purple-400 transition-colors">Sleep & Recovery Logs</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">
+              <Link href="/features/sleep-recovery" className="stripe-card p-6 block group cursor-pointer space-y-3">
+                <svg className="w-6 h-6 text-orange-500/80 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21" />
+                </svg>
+                <h3 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors font-display">Sleep & Recovery Logs</h3>
+                <p className="text-zinc-450 text-xs leading-relaxed font-light">
                   Tailored rest targets based on your training workload. Log sleep times to verify muscle fiber replenishment and optimize HGH hormone release.
                 </p>
               </Link>
@@ -1009,11 +1001,11 @@ export default function Home() {
               </button>
 
               <div className="text-center">
-                <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-green-500 rounded-xl flex items-center justify-center mx-auto mb-3 border border-zinc-800 shadow-md">
-                  <span className="text-xl font-black text-white">R</span>
+                <div className="w-14 h-14 bg-zinc-950 border border-zinc-850 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-md">
+                  <span className="text-xl font-black text-orange-500 font-display">R</span>
                 </div>
-                <h1 className="text-xl font-bold text-white tracking-tight">Resence Fitness Account</h1>
-                <p className="text-zinc-400 text-[10px] mt-1">Sign in to sync your adaptive baseline configuration.</p>
+                <h1 className="text-xl font-bold text-white tracking-tight font-display">Resence Fitness Account</h1>
+                <p className="text-zinc-400 text-[10px] mt-1 font-light">Sign in to sync your adaptive baseline configuration.</p>
               </div>
 
               {authError && (

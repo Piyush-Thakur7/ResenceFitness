@@ -95,23 +95,23 @@ How can I help you optimize your training, recovery, or diet structure today? Re
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
       {/* Header Info */}
-      <div className="flex flex-wrap items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-4 gap-4">
+      <div className="flex flex-wrap items-center justify-between stripe-card p-4 gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white flex items-center">
-            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 mr-2.5 animate-pulse"></span>
+          <h1 className="text-sm font-bold text-white flex items-center font-display tracking-wider uppercase">
+            <span className="w-2 h-2 rounded-full bg-orange-500 mr-2.5 animate-pulse"></span>
             Resence AI Coach
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">Custom training assistant calibrated to your body metrics.</p>
+          <p className="text-[10px] text-zinc-400 mt-0.5 font-light">Custom training assistant calibrated to your body metrics.</p>
         </div>
-        <div className="flex flex-wrap gap-2 text-[10px] text-zinc-300 font-bold uppercase tracking-wider">
-          <span className="bg-zinc-950 px-2.5 py-1 rounded border border-zinc-850">Goal: {profile.fitness_goal}</span>
-          <span className="bg-zinc-950 px-2.5 py-1 rounded border border-zinc-850">Diet: {profile.diet_preference}</span>
-          <span className="bg-zinc-950 px-2.5 py-1 rounded border border-zinc-850">Injuries: {profile.injuries || 'None'}</span>
+        <div className="flex flex-wrap gap-2 text-[8px] text-zinc-450 font-bold uppercase tracking-wider">
+          <span className="bg-zinc-950 px-2 py-0.5 rounded border border-zinc-850">Goal: {profile.fitness_goal}</span>
+          <span className="bg-zinc-950 px-2 py-0.5 rounded border border-zinc-850">Diet: {profile.diet_preference}</span>
+          <span className="bg-zinc-950 px-2 py-0.5 rounded border border-zinc-850">Injuries: {profile.injuries || 'None'}</span>
         </div>
       </div>
 
       {/* Main Chat Panel Container */}
-      <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col overflow-hidden relative shadow-sm">
+      <div className="flex-1 stripe-card flex flex-col overflow-hidden relative shadow-sm">
         {/* Messages List Area */}
         <div 
           ref={chatContainerRef}

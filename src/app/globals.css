@@ -21,9 +21,9 @@ h1, h2, h3, h4, h5, h6, .font-display {
   background-color: #030303;
   background-image: 
     radial-gradient(at 10% 10%, rgba(249, 115, 22, 0.09) 0px, transparent 55%),
-    radial-gradient(at 90% 10%, rgba(139, 92, 246, 0.08) 0px, transparent 55%),
+    radial-gradient(at 90% 10%, rgba(249, 115, 22, 0.04) 0px, transparent 55%),
     radial-gradient(at 50% 80%, rgba(249, 115, 22, 0.06) 0px, transparent 55%),
-    radial-gradient(at 80% 90%, rgba(139, 92, 246, 0.09) 0px, transparent 55%);
+    radial-gradient(at 80% 90%, rgba(249, 115, 22, 0.03) 0px, transparent 55%);
   background-attachment: fixed;
   position: relative;
   overflow: hidden;

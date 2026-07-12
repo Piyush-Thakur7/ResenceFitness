@@ -67,14 +67,14 @@ export default function BodyAssessmentSection({
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">AI Body Assessment</h1>
-        <p className="text-zinc-400 text-sm">Upload front/side physique photos to receive a detailed breakdown of focus areas and gap analyses from Gemini Vision.</p>
+        <h1 className="text-2xl font-bold text-white font-display tracking-wide uppercase">AI Body Assessment</h1>
+        <p className="text-zinc-400 text-xs mt-1 font-light">Upload front/side physique photos to receive a detailed breakdown of focus areas and gap analyses from Gemini Vision.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upload Form */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
-          <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">New Assessment</h2>
+        <div className="stripe-card p-6 space-y-4">
+          <h2 className="text-zinc-300 font-bold text-xs uppercase tracking-wider font-display">New Assessment</h2>
 
           {error && (
             <div className="p-3 bg-red-950 border border-red-900 text-red-300 text-xs rounded-lg">
@@ -140,20 +140,20 @@ export default function BodyAssessmentSection({
         {/* Right Column: Historical Reports & Active Report */}
         <div className="lg:col-span-2 space-y-6">
           {assessments.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-400 space-y-3">
+            <div className="stripe-card p-8 text-center text-zinc-400 space-y-3">
               <svg className="w-10 h-10 text-zinc-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <h3 className="font-bold text-white text-sm">No assessments generated</h3>
-              <p className="text-xs">Select and upload photos on the left to trigger your first body critique.</p>
+              <h3 className="font-bold text-white text-xs font-display uppercase tracking-wider">No assessments generated</h3>
+              <p className="text-[10px] font-light">Select and upload photos on the left to trigger your first body critique.</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Active / Latest report details */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 shadow-sm space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-zinc-850">
-                  <h3 className="text-zinc-200 font-bold text-sm">Latest Critique Report</h3>
-                  <span className="text-xs text-zinc-500 font-semibold">
+              <div className="stripe-card p-6 space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-zinc-900">
+                  <h3 className="text-zinc-200 font-bold text-xs uppercase tracking-wider font-display">Latest Critique Report</h3>
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
                     {new Date(assessments[0].date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -163,19 +163,19 @@ export default function BodyAssessmentSection({
                 </div>
 
                 {/* Markdown body rendering */}
-                <div className="prose prose-invert max-w-none text-sm text-zinc-300 space-y-4 leading-relaxed whitespace-pre-wrap">
+                <div className="prose prose-invert max-w-none text-xs text-zinc-300 space-y-4 leading-relaxed whitespace-pre-wrap font-light">
                   {assessments[0].assessment_report}
                 </div>
               </div>
 
               {/* Historical summaries if multiple exist */}
               {assessments.length > 1 && (
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
-                  <h3 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Historical Logs</h3>
-                  <div className="divide-y divide-zinc-850">
+                <div className="stripe-card p-6 space-y-4">
+                  <h3 className="text-zinc-350 font-bold text-xs uppercase tracking-wider font-display">Historical Logs</h3>
+                  <div className="divide-y divide-zinc-900">
                     {assessments.slice(1).map((as, idx) => (
-                      <details key={idx} className="group py-3 cursor-pointer">
-                        <summary className="flex justify-between items-center list-none text-xs text-zinc-400 group-open:text-white font-semibold">
+                      <details key={idx} className="group py-3.5 cursor-pointer">
+                        <summary className="flex justify-between items-center list-none text-xs text-zinc-400 group-open:text-orange-400 font-bold transition-colors uppercase tracking-wider">
                           <span>
                             Assessment from{' '}
                             {new Date(as.date).toLocaleDateString('en-US', {
@@ -184,11 +184,11 @@ export default function BodyAssessmentSection({
                               year: 'numeric',
                             })}
                           </span>
-                          <svg className="w-4 h-4 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          <svg className="w-4 h-4 transform group-open:rotate-180 transition-transform text-zinc-550" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
                           </svg>
                         </summary>
-                        <div className="mt-3 prose prose-invert max-w-none text-xs text-zinc-400 space-y-2 whitespace-pre-wrap pt-2 border-t border-zinc-900">
+                        <div className="mt-3 prose prose-invert max-w-none text-xs text-zinc-400 space-y-2 whitespace-pre-wrap pt-3 border-t border-zinc-900 font-light">
                           {as.assessment_report}
                         </div>
                       </details>
