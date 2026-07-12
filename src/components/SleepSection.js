@@ -5,6 +5,7 @@ import { useState } from 'react';
 export default function SleepSection({
   profile,
   sleepLog,
+  sleepLogs = [],
   onLogSleep,
 }) {
   const [hours, setHours] = useState(sleepLog?.actual_hours || 7.5);
@@ -108,6 +109,57 @@ export default function SleepSection({
             )}
           </div>
         </div>
+      </div>
+
+      {/* Sleep History Section */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
+        <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Sleep & Recovery History</h2>
+        
+        {sleepLogs.length === 0 ? (
+          <p className="text-xs text-zinc-500 italic py-4 text-center">Your logged sleep durations will populate a daily history timeline here.</p>
+        ) : (
+          <div className="space-y-3">
+            {sleepLogs.map((log, idx) => {
+              const reachedTarget = log.actual_hours >= log.recommended_hours;
+              const ratio = Math.min((log.actual_hours / log.recommended_hours) * 100, 100);
+              
+              return (
+                <div key={idx} className="bg-zinc-950 p-4 border border-zinc-850 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase font-bold block">Date Logged</span>
+                    <span className="text-xs font-bold text-white">
+                      {new Date(log.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                  
+                  {/* Progress Line */}
+                  <div className="flex-1 max-w-md space-y-1.5">
+                    <div className="flex justify-between text-[10px]">
+                      <span className="text-zinc-400">Recovery progression</span>
+                      <span className="font-semibold text-zinc-300">{log.actual_hours} / {log.recommended_hours} hrs</span>
+                    </div>
+                    <div className="w-full bg-zinc-900 h-2.5 rounded-full overflow-hidden border border-zinc-800">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-300 ${reachedTarget ? 'bg-green-500' : 'bg-orange-500'}`}
+                        style={{ width: `${ratio}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded border ${
+                      reachedTarget 
+                        ? 'bg-green-950/20 border-green-900 text-green-400' 
+                        : 'bg-orange-950/20 border-orange-900 text-orange-400'
+                    }`}>
+                      {reachedTarget ? 'Target Met' : 'Deficit'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

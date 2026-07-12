@@ -34,6 +34,7 @@ export default function Home() {
   const [dietPlan, setDietPlan] = useState(null);
   const [dietLogs, setDietLogs] = useState([]);
   const [sleepLog, setSleepLog] = useState(null);
+  const [sleepLogs, setSleepLogs] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [weightHistory, setWeightHistory] = useState([]);
   const [streak, setStreak] = useState({ current_streak: 0, weekly_progress: [false, false, false, false, false, false, false] });
@@ -159,6 +160,7 @@ export default function Home() {
     const { data: wLogs } = await supabase.from('workout_logs').select('*').eq('user_id', userId).eq('date', todayStr);
     const { data: dLogs } = await supabase.from('diet_logs').select('*').eq('user_id', userId).eq('date', todayStr);
     const { data: sLog } = await supabase.from('sleep_logs').select('*').eq('user_id', userId).eq('date', todayStr).single();
+    const { data: sLogs } = await supabase.from('sleep_logs').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(10);
     const { data: wHist } = await supabase.from('weight_history').select('*').eq('user_id', userId).order('logged_at', { ascending: true });
     const { data: bAssess } = await supabase.from('body_assessments').select('*').eq('user_id', userId).order('date', { ascending: false });
     const { data: stk } = await supabase.from('streaks').select('*').eq('user_id', userId).single();
@@ -168,6 +170,7 @@ export default function Home() {
     if (wLogs) setWorkoutLogs(wLogs);
     if (dLogs) setDietLogs(dLogs);
     if (sLog) setSleepLog(sLog);
+    if (sLogs) setSleepLogs(sLogs);
     if (wHist) setWeightHistory(wHist);
     if (bAssess) setAssessments(bAssess);
     if (stk) setStreak(stk);
@@ -187,6 +190,7 @@ export default function Home() {
       setWorkoutLogs(JSON.parse(localStorage.getItem(`mock_wlogs_${userId}`)) || []);
       setDietLogs(JSON.parse(localStorage.getItem(`mock_dlogs_${userId}`)) || []);
       setSleepLog(JSON.parse(localStorage.getItem(`mock_slog_${userId}`)) || null);
+      setSleepLogs(JSON.parse(localStorage.getItem(`mock_slogs_${userId}`)) || []);
       setWeightHistory(JSON.parse(localStorage.getItem(`mock_whist_${userId}`)) || []);
       setAssessments(JSON.parse(localStorage.getItem(`mock_assess_${userId}`)) || []);
       setStreak(JSON.parse(localStorage.getItem(`mock_streak_${userId}`)) || { current_streak: 1, weekly_progress: [true, false, false, false, false, false, false] });
@@ -497,8 +501,11 @@ export default function Home() {
 
     if (demoMode) {
       const record = { ...sleepData, date: todayStr };
+      const updated = [record, ...sleepLogs.filter(log => log.date !== todayStr)];
       localStorage.setItem(`mock_slog_${userId}`, JSON.stringify(record));
+      localStorage.setItem(`mock_slogs_${userId}`, JSON.stringify(updated));
       setSleepLog(record);
+      setSleepLogs(updated);
       return;
     }
 
@@ -1070,6 +1077,7 @@ export default function Home() {
             <SleepSection
               profile={profile}
               sleepLog={sleepLog}
+              sleepLogs={sleepLogs}
               onLogSleep={handleLogSleep}
             />
           )}
