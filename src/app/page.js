@@ -691,8 +691,9 @@ export default function Home() {
               <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
             </div>
             <div>
-              <span className="font-extrabold tracking-tight text-white block">Resence Fitness</span>
-              <span className="text-[9px] text-orange-400 font-bold block uppercase tracking-widest mt-0.5">Discipline Equals Freedom</span>
+              <span className="font-black tracking-widest text-white uppercase text-xs md:text-sm block">
+                Resence <span className="text-orange-500 font-light">Fitness</span>
+              </span>
             </div>
           </div>
           <button
@@ -978,8 +979,9 @@ export default function Home() {
             <img src={activeLogo.path} alt="Active Resence Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <span className="font-extrabold tracking-tight text-white block">Resence Fitness</span>
-            <span className="text-[9px] text-green-400 font-bold block uppercase tracking-widest mt-0.5">Every Day Is Day One</span>
+            <span className="font-black tracking-widest text-white uppercase text-xs md:text-sm block">
+              Resence <span className="text-orange-500 font-light">Fitness</span>
+            </span>
           </div>
         </div>
 
