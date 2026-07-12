@@ -27,7 +27,7 @@ export const metadata = {
     siteName: "Resence Fitness",
     images: [
       {
-        url: "/logos/logo_1.jpg",
+        url: "/logos/logo_2.jpg",
         width: 800,
         height: 800,
         alt: "Resence Fitness Logo",
@@ -40,7 +40,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Resence Fitness - Free AI Fitness Coach & Tracker",
     description: "Adaptive training splits, macro photography logging, and encrypted photo posture critiques - always free.",
-    images: ["/logos/logo_1.jpg"],
+    images: ["/logos/logo_2.jpg"],
   },
 };
 
