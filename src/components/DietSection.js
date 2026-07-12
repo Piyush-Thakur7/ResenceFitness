@@ -1,8 +1,18 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { supabase } from '@/lib/supabase';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+
+// Generic Portion Templates (Fallback 3)
+const GENERIC_TEMPLATES = [
+  { name: 'Typical Indian Thali', calories: 750, protein: 18, carbs: 110, fat: 22, fiber: 8, sodium: 950, sugar: 4 },
+  { name: 'Standard Beef Burger', calories: 600, protein: 26, carbs: 48, fat: 29, fiber: 2.5, sodium: 880, sugar: 6 },
+  { name: 'Chicken & Caesar Salad', calories: 420, protein: 28, carbs: 12, fat: 30, fiber: 3, sodium: 740, sugar: 2 },
+  { name: 'Three Eggs & Sourdough Toast', calories: 380, protein: 22, carbs: 26, fat: 18, fiber: 2, sodium: 490, sugar: 1.5 },
+  { name: 'Oatmeal with Honey & Fruits', calories: 340, protein: 8, carbs: 62, fat: 5, fiber: 7.5, sodium: 5, sugar: 22 },
+];
 
 export default function DietSection({
   profile,
@@ -23,7 +33,7 @@ export default function DietSection({
   const [sodium, setSodium] = useState('0');
   const [sugar, setSugar] = useState('0');
   
-  // Custom 2026 food photo/voice states
+  // Photo & voice preprocessing states
   const [uploading, setUploading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [manualFormOpen, setManualFormOpen] = useState(false);
@@ -32,6 +42,16 @@ export default function DietSection({
   const [frequentFoods, setFrequentFoods] = useState([]);
   const [editingItemIdx, setEditingItemIdx] = useState(null);
   
+  // Pipeline progress states (2026 standards)
+  // 'idle' | 'compress' | 'upload' | 'analyze' | 'done' | 'failed'
+  const [pipelineStep, setPipelineStep] = useState('idle');
+  const [pipelineError, setPipelineError] = useState(null);
+  const [retryAction, setRetryAction] = useState(null);
+  const [currentFile, setCurrentFile] = useState(null);
+  const [compressedBlob, setCompressedBlob] = useState(null);
+  const [base64Image, setBase64Image] = useState(null);
+  const [uploadedPath, setUploadedPath] = useState(null);
+
   // Voice & Text Input fallbacks
   const [voiceInput, setVoiceInput] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -154,6 +174,7 @@ export default function DietSection({
     setSugar('0');
     setPhotoPreview(null);
     setManualFormOpen(false);
+    setPipelineStep('idle');
   };
 
   // Save the collective itemized results list
@@ -191,6 +212,7 @@ export default function DietSection({
       protein: Math.round(totalProt * 10) / 10,
       carbs: Math.round(totalCarbs * 10) / 10,
       fat: Math.round(totalFat * 10) / 10,
+      photo_url: uploadedPath, // save Supabase private storage path
     });
 
     // Cache items individually
@@ -202,57 +224,263 @@ export default function DietSection({
     setScannedItems([]);
     setScannedHidden([]);
     setPhotoPreview(null);
+    setPipelineStep('idle');
   };
 
-  // Handle image upload and parse
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files?.[0];
+  // 1. Preprocess & compress step
+  const startProcessingPipeline = async (file) => {
     if (!file) return;
-
-    setUploading(true);
+    setCurrentFile(file);
+    setPipelineError(null);
     setPhotoPreview(URL.createObjectURL(file));
+    runCompression(file);
+  };
+
+  const runCompression = async (file) => {
+    setPipelineStep('compress');
+    let targetFile = file;
+
+    // HEIC / HEIF conversion fallback (P0)
+    if (file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+      try {
+        const heic2any = (await import('heic2any')).default;
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.8
+        });
+        targetFile = new File([convertedBlob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+      } catch (err) {
+        console.error('HEIC conversion failed:', err);
+        setPipelineError('HEIC photo conversion failed. Try uploading a screenshot or PNG.');
+        setPipelineStep('failed');
+        setRetryAction(() => () => runCompression(file));
+        return;
+      }
+    }
+
+    // Canvas-based image compression (max 1200px longest side, target <500KB)
+    const img = new Image();
+    img.src = URL.createObjectURL(targetFile);
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      const maxSide = 1200;
+      if (width > height && width > maxSide) {
+        height = Math.round((height * maxSide) / width);
+        width = maxSide;
+      } else if (height > maxSide) {
+        width = Math.round((width * maxSide) / height);
+        height = maxSide;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          setPipelineError('Image compression failed.');
+          setPipelineStep('failed');
+          setRetryAction(() => () => runCompression(file));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result.split(',')[1];
+          setCompressedBlob(blob);
+          setBase64Image(base64);
+          
+          // Proceed to upload
+          runUpload(blob, base64);
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', 0.8);
+    };
+    img.onerror = () => {
+      setPipelineError('Failed to read image. Make sure file is not corrupted.');
+      setPipelineStep('failed');
+      setRetryAction(() => () => runCompression(file));
+    };
+  };
+
+  // 2. Storage Upload step with 10s Abort timeout and 1 auto-retry
+  const runUpload = async (blob, base64, isRetry = false) => {
+    setPipelineStep('upload');
+    setPipelineError(null);
+
+    if (!navigator.onLine) {
+      setPipelineError('Network offline. Please check your internet connection.');
+      setPipelineStep('failed');
+      setRetryAction(() => () => runUpload(blob, base64));
+      return;
+    }
+
+    const filePath = `${profile.id}/meal_${Date.now()}.jpg`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('meal-photos')
+        .upload(filePath, blob, {
+          contentType: 'image/jpeg',
+          upsert: true
+        });
+      
+      clearTimeout(timeoutId);
+      if (error) throw error;
+
+      setUploadedPath(data.path);
+      // Proceed to analyze
+      runAnalysis(base64, data.path);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.error('Upload failed:', err);
+
+      if (!isRetry) {
+        console.log('Retrying upload once...');
+        runUpload(blob, base64, true);
+      } else {
+        setPipelineError('Upload slow. Try again?');
+        setPipelineStep('failed');
+        setRetryAction(() => () => runUpload(blob, base64));
+      }
+    }
+  };
+
+  // 3. Gemini Vision analysis step with strict schema parsing & 1 retry
+  const runAnalysis = async (base64, path, isRetry = false) => {
+    setPipelineStep('analyze');
+    setPipelineError(null);
+
+    try {
+      const res = await onAnalyzeMealPhoto(base64, 'image/jpeg');
+      if (res && res.items) {
+        setMealName(res.meal_name || 'Scanned Meal');
+        const parsedItems = res.items.map(item => ({
+          name: item.name,
+          weight_g: item.weight_g || 100,
+          calories: item.calories || 0,
+          protein: item.protein_g || 0,
+          carbs: item.carbs_g || 0,
+          fat: item.fat_g || 0,
+          fiber: item.fiber_g || 0,
+          sodium: item.sodium_mg || 0,
+          sugar: item.sugar_g || 0,
+          confidence: item.confidence || 0.85,
+          original_weight: item.weight_g || 100,
+          original_calories: item.calories || 0,
+          original_protein: item.protein_g || 0,
+          original_carbs: item.carbs_g || 0,
+          original_fat: item.fat_g || 0,
+          original_fiber: item.fiber_g || 0,
+          original_sodium: item.sodium_mg || 0,
+          original_sugar: item.sugar_g || 0,
+        }));
+        setScannedItems(parsedItems);
+        
+        if (res.hidden_ingredients) {
+          setScannedHidden(res.hidden_ingredients.map(hi => ({
+            name: hi.name,
+            default_amount: hi.typical_amount || '1 tbsp (14g)',
+            calories: hi.calories || 120,
+            protein: 0,
+            carbs: 0,
+            fat: 14,
+            fiber: 0,
+            sodium: 0,
+            sugar: 0,
+            checked: false
+          })));
+        }
+        setPipelineStep('done');
+      } else {
+        throw new Error('Invalid JSON structure returned from analysis');
+      }
+    } catch (err) {
+      console.error('Analysis failed:', err);
+      if (!isRetry) {
+        console.log('Retrying analysis once...');
+        runAnalysis(base64, path, true);
+      } else {
+        setPipelineError('Could not analyze. Try a clearer photo or log manually.');
+        setPipelineStep('failed');
+        setRetryAction(() => () => runAnalysis(base64, path));
+      }
+    }
+  };
+
+  // Text/Voice description pipeline with 1 auto-retry
+  const runTextAnalysis = async (textVal, isRetry = false) => {
+    if (!textVal.trim()) return;
+    setUploading(true);
+    setPipelineStep('analyze');
+    setPipelineError(null);
     setScannedItems([]);
     setScannedHidden([]);
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      try {
-        const base64Data = reader.result.split(',')[1];
-        const res = await onAnalyzeMealPhoto(base64Data, file.type);
-        if (res) {
-          setMealName(res.meal_name || 'Scanned Meal');
-          if (res.items && res.items.length > 0) {
-            setScannedItems(res.items.map(item => ({
-              ...item,
-              original_weight: item.weight_g || 100,
-              original_calories: item.calories || 0,
-              original_protein: item.protein || 0,
-              original_carbs: item.carbs || 0,
-              original_fat: item.fat || 0,
-              original_fiber: item.fiber || 0,
-              original_sodium: item.sodium || 0,
-              original_sugar: item.sugar || 0,
-            })));
-            if (res.suggested_hidden_ingredients) {
-              setScannedHidden(res.suggested_hidden_ingredients.map(item => ({
-                ...item,
-                checked: false
-              })));
-            }
-          }
-          setManualFormOpen(false);
+    
+    try {
+      const res = await onAnalyzeMealPhoto(null, null, textVal);
+      if (res && res.items) {
+        setMealName(res.meal_name || 'Verbal Meal');
+        const parsedItems = res.items.map(item => ({
+          name: item.name,
+          weight_g: item.weight_g || 100,
+          calories: item.calories || 0,
+          protein: item.protein_g || 0,
+          carbs: item.carbs_g || 0,
+          fat: item.fat_g || 0,
+          fiber: item.fiber_g || 0,
+          sodium: item.sodium_mg || 0,
+          sugar: item.sugar_g || 0,
+          confidence: item.confidence || 0.85,
+          original_weight: item.weight_g || 100,
+          original_calories: item.calories || 0,
+          original_protein: item.protein_g || 0,
+          original_carbs: item.carbs_g || 0,
+          original_fat: item.fat_g || 0,
+          original_fiber: item.fiber_g || 0,
+          original_sodium: item.sodium_mg || 0,
+          original_sugar: item.sugar_g || 0,
+        }));
+        setScannedItems(parsedItems);
+        if (res.hidden_ingredients) {
+          setScannedHidden(res.hidden_ingredients.map(hi => ({
+            name: hi.name,
+            default_amount: hi.typical_amount || '1 tbsp (14g)',
+            calories: hi.calories || 120,
+            protein: 0,
+            carbs: 0,
+            fat: 14,
+            fiber: 0,
+            sodium: 0,
+            sugar: 0,
+            checked: false
+          })));
         }
-      } catch (err) {
-        console.error('Failed to parse food photo:', err);
-        alert('Could not recognize food. Please try voice logging or manual log.');
-      } finally {
-        setUploading(false);
+        setPipelineStep('done');
+      } else {
+        throw new Error('Invalid analysis response');
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      if (!isRetry) {
+        runTextAnalysis(textVal, true);
+      } else {
+        setPipelineError('Verbal analysis failed. Try manual log or template quick-picks.');
+        setPipelineStep('failed');
+        setRetryAction(() => () => runTextAnalysis(textVal));
+      }
+    } finally {
+      setUploading(false);
+    }
   };
 
-  // Web Speech API Voice logger
+  // Web Speech API Voice listener
   const handleVoiceListen = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       alert('Speech recognition is not supported in this browser. Please type description instead.');
@@ -281,58 +509,20 @@ export default function DietSection({
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setVoiceInput(transcript);
-      parseVoiceDescription(transcript);
+      runTextAnalysis(transcript);
     };
 
     recognition.start();
   };
 
-  const parseVoiceDescription = async (textVal) => {
-    if (!textVal.trim()) return;
-    setUploading(true);
-    setScannedItems([]);
-    setScannedHidden([]);
-    
-    try {
-      const res = await onAnalyzeMealPhoto(null, null, textVal);
-      if (res) {
-        setMealName(res.meal_name || 'Verbal Meal');
-        if (res.items && res.items.length > 0) {
-          setScannedItems(res.items.map(item => ({
-            ...item,
-            original_weight: item.weight_g || 100,
-            original_calories: item.calories || 0,
-            original_protein: item.protein || 0,
-            original_carbs: item.carbs || 0,
-            original_fat: item.fat || 0,
-            original_fiber: item.fiber || 0,
-            original_sodium: item.sodium || 0,
-            original_sugar: item.sugar || 0,
-          })));
-          if (res.suggested_hidden_ingredients) {
-            setScannedHidden(res.suggested_hidden_ingredients.map(item => ({
-              ...item,
-              checked: false
-            })));
-          }
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Could not parse description. Please try manual log form.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Mock barcode scanner parsing
+  // Barcode packaged food mock log
   const handleBarcodeSubmit = (e) => {
     e.preventDefault();
     if (!barcodeInput.trim()) return;
 
     setUploading(true);
+    setPipelineStep('analyze');
     setTimeout(() => {
-      // Return a structured item
       setMealName('Packaged Protein bar');
       setScannedItems([
         {
@@ -357,9 +547,39 @@ export default function DietSection({
         }
       ]);
       setUploading(false);
+      setPipelineStep('done');
       setShowBarcode(false);
       setBarcodeInput('');
     }, 1000);
+  };
+
+  // Apply Generic Portion Template (Fallback 3)
+  const handleSelectTemplate = (tpl) => {
+    setMealName(tpl.name);
+    setScannedItems([
+      {
+        name: tpl.name,
+        weight_g: 350,
+        calories: tpl.calories,
+        protein: tpl.protein,
+        carbs: tpl.carbs,
+        fat: tpl.fat,
+        fiber: tpl.fiber,
+        sodium: tpl.sodium,
+        sugar: tpl.sugar,
+        confidence: 0.9,
+        original_weight: 350,
+        original_calories: tpl.calories,
+        original_protein: tpl.protein,
+        original_carbs: tpl.carbs,
+        original_fat: tpl.fat,
+        original_fiber: tpl.fiber,
+        original_sodium: tpl.sodium,
+        original_sugar: tpl.sugar,
+      }
+    ]);
+    setPipelineStep('done');
+    setPipelineError(null);
   };
 
   // Edit item weight and proportionally recalculate macros
@@ -625,9 +845,9 @@ export default function DietSection({
                   <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Photo Capture</span>
                   <input
                     type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    disabled={uploading}
+                    accept="image/*,image/heic,image/heif"
+                    onChange={(e) => startProcessingPipeline(e.target.files?.[0])}
+                    disabled={pipelineStep !== 'idle' && pipelineStep !== 'done' && pipelineStep !== 'failed'}
                     className="hidden"
                   />
                 </label>
@@ -683,19 +903,118 @@ export default function DietSection({
                 </form>
               )}
 
-              {/* Loader with spinner details */}
-              {uploading && (
-                <div className="p-8 bg-zinc-950 border border-zinc-850 rounded-xl flex flex-col items-center justify-center space-y-2">
-                  <svg className="w-7 h-7 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider animate-pulse">Gemini analyzing food elements...</span>
+              {/* 2026 Step Progress indicators (Compress -> Upload -> Analyze -> Done) */}
+              {pipelineStep !== 'idle' && (
+                <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl space-y-3.5">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-zinc-400">Processing Status</span>
+                    {pipelineStep === 'failed' && (
+                      <span className="text-red-400 animate-pulse">✖ Processing Failed</span>
+                    )}
+                    {pipelineStep === 'done' && (
+                      <span className="text-green-400">✓ Completed</span>
+                    )}
+                    {pipelineStep !== 'done' && pipelineStep !== 'failed' && (
+                      <span className="text-orange-400 animate-pulse">⚡ Active</span>
+                    )}
+                  </div>
+
+                  {/* Horizontal steps flow visual */}
+                  <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                    <div className={`flex flex-col items-center ${pipelineStep === 'compress' ? 'text-orange-400' : (pipelineStep !== 'failed' && pipelineStep !== 'idle' ? 'text-green-400' : '')}`}>
+                      <span>[1] Compress</span>
+                    </div>
+                    <div className="w-6 h-px bg-zinc-850" />
+                    <div className={`flex flex-col items-center ${pipelineStep === 'upload' ? 'text-orange-400' : (pipelineStep === 'analyze' || pipelineStep === 'done' ? 'text-green-400' : '')}`}>
+                      <span>[2] Upload</span>
+                    </div>
+                    <div className="w-6 h-px bg-zinc-850" />
+                    <div className={`flex flex-col items-center ${pipelineStep === 'analyze' ? 'text-orange-400' : (pipelineStep === 'done' ? 'text-green-400' : '')}`}>
+                      <span>[3] Analyze</span>
+                    </div>
+                    <div className="w-6 h-px bg-zinc-850" />
+                    <div className={`flex flex-col items-center ${pipelineStep === 'done' ? 'text-green-400' : ''}`}>
+                      <span>[4] Finished</span>
+                    </div>
+                  </div>
+
+                  {/* Error display with Retry option (P1) */}
+                  {pipelineStep === 'failed' && pipelineError && (
+                    <div className="p-3 bg-red-950/20 border border-red-900/50 rounded-lg space-y-2.5 text-center">
+                      <p className="text-[10px] text-red-300 font-semibold leading-relaxed">{pipelineError}</p>
+                      <div className="flex justify-center gap-2">
+                        {retryAction && (
+                          <button
+                            type="button"
+                            onClick={retryAction}
+                            className="bg-orange-500 hover:bg-orange-600 text-black font-extrabold text-[9px] px-3.5 py-1 rounded-md uppercase tracking-wider transition-colors cursor-pointer"
+                          >
+                            Retry Step
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPipelineStep('idle');
+                            setPipelineError(null);
+                            setPhotoPreview(null);
+                          }}
+                          className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 text-[9px] px-3 py-1 rounded-md uppercase tracking-wider transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Fallback list offered immediately on failures (P1) */}
+                  {pipelineStep === 'failed' && (
+                    <div className="border-t border-zinc-900 pt-3 space-y-2.5">
+                      <span className="block text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Fallback Quick Options</span>
+                      
+                      {/* Search / Voice verbal fallback logs (Fallback 1) */}
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          placeholder="Or verbally describe your meal details here (e.g. 'I had 150g grilled salmon and a cup of brown rice')"
+                          value={voiceInput}
+                          onChange={(e) => setVoiceInput(e.target.value)}
+                          className="w-full bg-zinc-900 border border-zinc-850 rounded-lg p-2.5 text-[11px] text-white placeholder-zinc-500 focus:outline-none"
+                          rows={2}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => runTextAnalysis(voiceInput)}
+                          disabled={!voiceInput.trim()}
+                          className="bg-zinc-850 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wider disabled:opacity-40 cursor-pointer"
+                        >
+                          Analyze Text Description
+                        </button>
+                      </div>
+
+                      {/* Generic templates list (Fallback 3) */}
+                      <div className="space-y-1.5">
+                        <span className="block text-[8px] text-zinc-600 font-bold uppercase">Generic Portion Templates</span>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {GENERIC_TEMPLATES.map((tpl, tIdx) => (
+                            <button
+                              key={tIdx}
+                              type="button"
+                              onClick={() => handleSelectTemplate(tpl)}
+                              className="bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-850 p-2 rounded-lg text-left text-[9px] transition-colors cursor-pointer"
+                            >
+                              <strong className="text-white block truncate">{tpl.name}</strong>
+                              <span className="text-orange-400 font-semibold">{tpl.calories} kcal | {tpl.protein}g P</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Portion Guidance suggestion */}
-              {photoPreview && (
+              {photoPreview && pipelineStep === 'idle' && (
                 <div className="flex items-center gap-3 p-3 bg-zinc-950/60 border border-zinc-850 rounded-xl text-[10px] text-zinc-400">
                   <span className="text-base">📏</span>
                   <p>
@@ -705,7 +1024,7 @@ export default function DietSection({
               )}
 
               {/* Scanned item list results editor */}
-              {scannedItems.length > 0 && (
+              {scannedItems.length > 0 && pipelineStep === 'done' && (
                 <div className="space-y-4 pt-3 border-t border-zinc-850 animate-in fade-in duration-300">
                   <div className="flex justify-between items-center">
                     <div className="space-y-1">
@@ -781,7 +1100,7 @@ export default function DietSection({
                                 type="number"
                                 value={item.weight_g || 100}
                                 onChange={(e) => handleItemWeightChange(idx, e.target.value)}
-                                className="w-full bg-zinc-900 border border-zinc-850 rounded px-2 py-1 text-white font-bold focus:outline-none focus:border-orange-500"
+                                className="w-full bg-zinc-900 border border-zinc-855 rounded px-2 py-1 text-white font-bold focus:outline-none focus:border-orange-500"
                               />
                             </div>
                             <div className="bg-zinc-950/40 p-2 border border-zinc-850 rounded-lg">
@@ -829,11 +1148,11 @@ export default function DietSection({
                             className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer ${
                               hidden.checked
                                 ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
-                                : 'bg-zinc-900 border-zinc-850 text-zinc-400 hover:text-white'
+                                : 'bg-zinc-900 border-zinc-855 text-zinc-400 hover:text-white'
                             }`}
                           >
                             <span>{hidden.checked ? '✓' : '+'}</span>
-                            <span>{hidden.name} ({hidden.default_amount})</span>
+                            <span>{hidden.name} ({hidden.typical_amount})</span>
                           </button>
                         ))}
                       </div>
@@ -893,7 +1212,7 @@ export default function DietSection({
                   {dietLogs.map((log, idx) => {
                     const cleanName = log.meal_name.split('|||')[0];
                     return (
-                      <div key={idx} className="bg-zinc-950 border border-zinc-850 p-3 rounded-lg flex items-center justify-between">
+                      <div key={idx} className="bg-zinc-950 border border-zinc-855 p-3 rounded-lg flex items-center justify-between">
                         <div>
                           <span className="text-xs bg-zinc-900 text-zinc-400 border border-zinc-850 px-2 py-0.5 rounded-full font-medium mr-2">
                             {log.meal_type}
@@ -975,7 +1294,7 @@ export default function DietSection({
               </div>
 
               {manualFormOpen && (
-                <form onSubmit={handleSubmit} className="space-y-4 pt-2 border-t border-zinc-850 animate-in fade-in duration-350">
+                <form onSubmit={handleSubmit} className="space-y-4 pt-2 border-t border-zinc-850 animate-in fade-in duration-355">
                   <div>
                     <label className="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Meal Type</label>
                     <select
@@ -1056,7 +1375,7 @@ export default function DietSection({
                           step="0.1"
                           value={fiber}
                           onChange={(e) => setFiber(e.target.value)}
-                          className="w-full bg-zinc-950 border border-zinc-850 rounded-lg px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-orange-500"
+                          className="w-full bg-zinc-950 border border-zinc-855 rounded-lg px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-orange-500"
                         />
                       </div>
                       <div>
@@ -1065,7 +1384,7 @@ export default function DietSection({
                           type="number"
                           value={sodium}
                           onChange={(e) => setSodium(e.target.value)}
-                          className="w-full bg-zinc-950 border border-zinc-850 rounded-lg px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-orange-500"
+                          className="w-full bg-zinc-950 border border-zinc-855 rounded-lg px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-orange-500"
                         />
                       </div>
                       <div>
@@ -1075,7 +1394,7 @@ export default function DietSection({
                           step="0.1"
                           value={sugar}
                           onChange={(e) => setSugar(e.target.value)}
-                          className="w-full bg-zinc-950 border border-zinc-850 rounded-lg px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-orange-500"
+                          className="w-full bg-zinc-950 border border-zinc-855 rounded-lg px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-orange-500"
                         />
                       </div>
                     </div>

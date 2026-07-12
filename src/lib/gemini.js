@@ -13,6 +13,19 @@ function getModel() {
   return genAI.getGenerativeModel({ model: modelName });
 }
 
+function parseJsonSafe(responseText) {
+  let cleaned = responseText.trim();
+  if (cleaned.includes('```')) {
+    cleaned = cleaned.replace(/```json/gi, '').replace(/```/gi, '').trim();
+  }
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error('Failed to parse clean JSON:', cleaned);
+    throw e;
+  }
+}
+
 /**
  * Generates an adaptive weekly workout plan
  */
@@ -153,40 +166,39 @@ export async function analyzeFoodPhoto(base64Image, mimeType = 'image/jpeg') {
   };
 
   const prompt = `
-    Analyze this photo of a meal. Identify EACH individual food ingredient/item separately and estimate portion weight in grams and detailed nutrition metrics.
-    
-    If the image is not food, return a dummy item with meal_name "Not identified as food" and an empty "items" list.
-
-    Output the response in JSON format matching this schema:
+    Analyze this food photo. Identify EACH distinct food item separately.
+    Return ONLY a JSON object. No markdown, no explanation, no text outside JSON.
+    Format:
     {
-      "meal_name": "Name of the meal",
+      "meal_name": "General name of the meal (e.g. Chicken Rice with Asparagus)",
       "items": [
         {
-          "name": "Name of individual food item (e.g. White Rice, Grilled Chicken Breast)",
-          "weight_g": number,
-          "calories": number,
-          "protein": number, -- in grams
-          "carbs": number, -- in grams
-          "fat": number, -- in grams
-          "fiber": number, -- in grams
-          "sodium": number, -- in milligrams
-          "sugar": number, -- in grams
-          "confidence": number -- float between 0.0 and 1.0 representing how confident you are in this item's identity
+          "name": "Grilled Chicken Breast",
+          "weight_g": 150,
+          "calories": 248,
+          "protein_g": 52,
+          "carbs_g": 0,
+          "fat_g": 14,
+          "fiber_g": 0,
+          "sodium_mg": 82,
+          "sugar_g": 0,
+          "confidence": 0.94
         }
       ],
-      "suggested_hidden_ingredients": [
+      "hidden_ingredients": [
         {
-          "name": "Name of likely hidden ingredient (e.g. Cooking Oil, Butter, Salad Dressing)",
-          "default_amount": "e.g. 1 tbsp (14g)",
-          "calories": number,
-          "protein": number,
-          "carbs": number,
-          "fat": number,
-          "fiber": number,
-          "sodium": number,
-          "sugar": number
+          "name": "Cooking Oil",
+          "typical_amount": "1 tbsp (14g)",
+          "calories": 120,
+          "likely": true
         }
-      ]
+      ],
+      "total": {
+        "calories": 248,
+        "protein_g": 52,
+        "carbs_g": 0,
+        "fat_g": 14
+      }
     }
   `;
 
@@ -197,7 +209,7 @@ export async function analyzeFoodPhoto(base64Image, mimeType = 'image/jpeg') {
     },
   });
 
-  return JSON.parse(result.response.text());
+  return parseJsonSafe(result.response.text());
 }
 
 /**
@@ -207,41 +219,39 @@ export async function analyzeFoodText(description) {
   const model = getModel();
 
   const prompt = `
-    Analyze this text description of a meal: "${description}". 
-    Identify EACH individual food ingredient/item separately and estimate portion weight in grams and detailed nutrition metrics.
-    
-    If the description is not food, return a dummy item with meal_name "Not identified as food" and an empty "items" list.
-
-    Output the response in JSON format matching this schema:
+    Analyze this text description of a meal: "${description}". Identify EACH distinct food item separately.
+    Return ONLY a JSON object. No markdown, no explanation, no text outside JSON.
+    Format:
     {
-      "meal_name": "Name of the meal",
+      "meal_name": "General name of the meal",
       "items": [
         {
-          "name": "Name of individual food item (e.g. White Rice, Grilled Chicken Breast)",
-          "weight_g": number,
-          "calories": number,
-          "protein": number, -- in grams
-          "carbs": number, -- in grams
-          "fat": number, -- in grams
-          "fiber": number, -- in grams
-          "sodium": number, -- in milligrams
-          "sugar": number, -- in grams
-          "confidence": number -- float between 0.0 and 1.0 representing how confident you are in this item's identity
+          "name": "Grilled Chicken Breast",
+          "weight_g": 150,
+          "calories": 248,
+          "protein_g": 52,
+          "carbs_g": 0,
+          "fat_g": 14,
+          "fiber_g": 0,
+          "sodium_mg": 82,
+          "sugar_g": 0,
+          "confidence": 0.94
         }
       ],
-      "suggested_hidden_ingredients": [
+      "hidden_ingredients": [
         {
-          "name": "Name of likely hidden ingredient (e.g. Cooking Oil, Butter, Salad Dressing)",
-          "default_amount": "e.g. 1 tbsp (14g)",
-          "calories": number,
-          "protein": number,
-          "carbs": number,
-          "fat": number,
-          "fiber": number,
-          "sodium": number,
-          "sugar": number
+          "name": "Cooking Oil",
+          "typical_amount": "1 tbsp (14g)",
+          "calories": 120,
+          "likely": true
         }
-      ]
+      ],
+      "total": {
+        "calories": 248,
+        "protein_g": 52,
+        "carbs_g": 0,
+        "fat_g": 14
+      }
     }
   `;
 
@@ -252,7 +262,7 @@ export async function analyzeFoodText(description) {
     },
   });
 
-  return JSON.parse(result.response.text());
+  return parseJsonSafe(result.response.text());
 }
 
 /**
