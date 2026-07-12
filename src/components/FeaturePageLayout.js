@@ -28,7 +28,7 @@ export default function FeaturePageLayout({
       <header className="bg-zinc-900/40 backdrop-blur-md border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between sticky top-0 z-45">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-850 bg-zinc-950 flex items-center justify-center">
-            <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
+            <img src="/logos/logo_2.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
           </div>
           <Link href="/">
             <span className="font-display font-extrabold tracking-widest text-white uppercase text-xs md:text-sm block cursor-pointer">

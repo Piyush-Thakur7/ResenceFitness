@@ -732,7 +732,7 @@ export default function Home() {
   };
 
   // Get active logo details
-  const activeLogo = LOGO_OPTIONS.find(l => l.id === selectedLogoId) || LOGO_OPTIONS[0];
+  const activeLogo = LOGO_OPTIONS.find(l => l.id === selectedLogoId) || LOGO_OPTIONS[1];
 
   // Loader View
   if (loading) {
@@ -762,8 +762,8 @@ export default function Home() {
         {/* Sticky Glassmorphic Navbar */}
         <header className="bg-zinc-900/40 backdrop-blur-md border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-850 bg-zinc-950 flex items-center justify-center">
-              <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-855 bg-zinc-950 flex items-center justify-center">
+              <img src="/logos/logo_2.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <span className="font-display font-extrabold tracking-widest text-white uppercase text-xs md:text-sm block">
@@ -901,7 +901,7 @@ export default function Home() {
             <div className="space-y-4 col-span-2 md:col-span-1">
               <div className="flex items-center space-x-2.5">
                 <div className="w-6 h-6 rounded border border-zinc-800 overflow-hidden bg-zinc-950 flex items-center justify-center">
-                  <img src="/logos/logo_1.jpg" alt="Logo" className="w-full h-full object-cover" />
+                  <img src="/logos/logo_2.jpg" alt="Logo" className="w-full h-full object-cover" />
                 </div>
                 <span className="text-white font-bold uppercase tracking-wider text-xs">Resence Fitness</span>
               </div>
