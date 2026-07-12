@@ -766,8 +766,8 @@ export default function Home() {
               <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
             </div>
             <div>
-              <span className="font-light tracking-widest text-white uppercase text-xs md:text-sm block">
-                Resence <span className="text-orange-500 font-light">Fitness</span>
+              <span className="font-display font-extrabold tracking-widest text-white uppercase text-xs md:text-sm block">
+                Resence <span className="text-orange-500 font-extrabold">Fitness</span>
               </span>
             </div>
           </div>
@@ -1103,8 +1103,8 @@ export default function Home() {
             <img src={activeLogo.path} alt="Active Resence Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <span className="font-light tracking-widest text-white uppercase text-xs md:text-sm block">
-              Resence <span className="text-orange-500 font-light">Fitness</span>
+            <span className="font-display font-extrabold tracking-widest text-white uppercase text-xs md:text-sm block">
+              Resence <span className="text-orange-500 font-extrabold">Fitness</span>
             </span>
           </div>
         </div>

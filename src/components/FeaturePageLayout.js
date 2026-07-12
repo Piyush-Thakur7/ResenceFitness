@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function FeaturePageLayout({ 
   title, 
   tagline, 
-  badge = "🎁 FREE FOREVER", 
+  badge = "🤖 ADAPTIVE INTENSITY", 
   description,
   schemaStructuredData = null,
   children 
@@ -31,8 +31,8 @@ export default function FeaturePageLayout({
             <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
           </div>
           <Link href="/">
-            <span className="font-light tracking-widest text-white uppercase text-xs md:text-sm block cursor-pointer">
-              Resence <span className="text-orange-500 font-light">Fitness</span>
+            <span className="font-display font-extrabold tracking-widest text-white uppercase text-xs md:text-sm block cursor-pointer">
+              Resence <span className="text-orange-500 font-extrabold">Fitness</span>
             </span>
           </Link>
         </div>
