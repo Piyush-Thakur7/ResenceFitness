@@ -101,15 +101,13 @@ function AnimatedExerciseDemo({ muscle = '' }) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 relative overflow-hidden p-6 rounded-xl border border-zinc-850 min-h-[160px]">
         <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
-        {/* Animated Barbell */}
         <div className="w-24 h-1.5 bg-zinc-700 rounded-full animate-bounce duration-1000 flex items-center justify-between px-1 relative z-10">
           <div className="w-3.5 h-6 bg-zinc-600 rounded" />
           <div className="w-3.5 h-6 bg-zinc-600 rounded" />
         </div>
-        {/* Bench Silhouette */}
         <div className="w-20 h-2 bg-zinc-900 border border-zinc-800 mt-4 rounded-full z-0" />
         <div className="w-2.5 h-6 bg-zinc-900 border border-zinc-800 z-0" />
-        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Chest Press Motion</span>
+        <span className="text-[9px] text-zinc-500 mt-3 uppercase tracking-widest font-black">Chest Press Motion</span>
       </div>
     );
   } else if (m.includes('shoulder')) {
@@ -123,7 +121,7 @@ function AnimatedExerciseDemo({ muscle = '' }) {
         <div className="w-10 h-12 rounded-t-xl bg-zinc-900 border border-zinc-800 mt-2 flex items-center justify-center z-0">
           <div className="w-3 h-3 bg-orange-500/40 rounded-full animate-pulse" />
         </div>
-        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Shoulder Press Motion</span>
+        <span className="text-[9px] text-zinc-500 mt-3 uppercase tracking-widest font-black">Shoulder Press Motion</span>
       </div>
     );
   } else if (m.includes('back') || m.includes('lat')) {
@@ -136,7 +134,7 @@ function AnimatedExerciseDemo({ muscle = '' }) {
         <div className="w-8 h-10 bg-zinc-900 border border-zinc-800 mt-1 rounded flex flex-col items-center justify-center">
           <div className="w-4 h-5 bg-green-500/20 rounded border border-green-500/40 animate-pulse" />
         </div>
-        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Pulldown / Row Motion</span>
+        <span className="text-[9px] text-zinc-500 mt-3 uppercase tracking-widest font-black">Pulldown / Row Motion</span>
       </div>
     );
   } else if (m.includes('bicep') || m.includes('tricep') || m.includes('arm')) {
@@ -148,7 +146,7 @@ function AnimatedExerciseDemo({ muscle = '' }) {
           <div className="absolute w-1.5 h-8 bg-zinc-700 origin-bottom rounded-full animate-pulse" style={{ transformOrigin: 'bottom center', transform: 'rotate(-45deg)' }} />
           <div className="absolute w-3 h-3 bg-orange-500 rounded z-30" style={{ transform: 'translateY(-10px)' }} />
         </div>
-        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Arm Curl / Extension</span>
+        <span className="text-[9px] text-zinc-500 mt-3 uppercase tracking-widest font-black">Arm Curl / Extension</span>
       </div>
     );
   } else if (m.includes('leg') || m.includes('quad') || m.includes('hamstring') || m.includes('glute') || m.includes('calf')) {
@@ -159,7 +157,7 @@ function AnimatedExerciseDemo({ muscle = '' }) {
           <div className="w-4 h-4 bg-orange-500/20 rounded border border-orange-500/30 animate-pulse" />
         </div>
         <div className="w-14 h-1.5 bg-zinc-900 rounded-full mt-1" />
-        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Squat / Leg Drive</span>
+        <span className="text-[9px] text-zinc-500 mt-3 uppercase tracking-widest font-black">Squat / Leg Drive</span>
       </div>
     );
   } else {
@@ -169,7 +167,7 @@ function AnimatedExerciseDemo({ muscle = '' }) {
         <div className="w-10 h-10 border-2 border-dashed border-orange-500/40 rounded-full flex items-center justify-center animate-spin duration-3000">
           <div className="w-5 h-5 bg-orange-500/20 rounded-full animate-ping" />
         </div>
-        <span className="text-[10px] text-zinc-500 mt-3 uppercase tracking-widest font-bold">Stamina & Core Shield</span>
+        <span className="text-[9px] text-zinc-500 mt-3 uppercase tracking-widest font-black">Stamina & Core Shield</span>
       </div>
     );
   }
@@ -256,18 +254,18 @@ export default function WorkoutSection({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-300">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Adaptive Fitness Plan</h1>
-          <p className="text-zinc-400 text-sm">AI-customized weekly workouts factored by your goals and limitations.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-display font-extrabold text-white tracking-tight uppercase">Adaptive Training Plan</h1>
+          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">AI-customized weekly workouts factored by your goals and limitations.</p>
         </div>
         {workoutPlan && (
           <button
             onClick={onGeneratePlan}
             disabled={loading}
-            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 px-4 py-2 rounded-lg cursor-pointer transition-colors disabled:opacity-50"
+            className="bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all disabled:opacity-50"
           >
             {loading ? 'Regenerating...' : 'Regenerate Weekly Plan'}
           </button>
@@ -275,26 +273,26 @@ export default function WorkoutSection({
       </div>
 
       {!workoutPlan ? (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-10 text-center space-y-6">
+        <div className="stripe-card p-8 text-center space-y-6">
           <div className="max-w-md mx-auto space-y-4">
-            <div className="bg-orange-950/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto border border-orange-950">
-              <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-orange-500/5 w-14 h-14 rounded-xl flex items-center justify-center mx-auto border border-orange-950">
+              <svg className="w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-white">No active plan generated</h2>
-            <p className="text-zinc-400 text-sm">
+            <h2 className="text-lg font-display font-extrabold text-white uppercase tracking-tight">No active plan generated</h2>
+            <p className="text-zinc-500 text-xs leading-relaxed">
               Your onboarding is complete. Tap below to have Resence Gemini analyze your body metrics, goals, and limitations to compile your workout routine.
             </p>
             {profile?.injuries && (
-              <p className="text-xs text-orange-400 bg-orange-950/20 border border-orange-900/50 p-2.5 rounded-lg">
+              <p className="text-[11px] text-orange-400 bg-orange-500/5 border border-orange-950 px-3 py-2 rounded-xl font-medium">
                 ⚠️ Gemini will incorporate your injury limitation: "{profile.injuries}"
               </p>
             )}
             <button
               onClick={onGeneratePlan}
               disabled={loading}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition-colors cursor-pointer w-full sm:w-auto disabled:opacity-50"
+              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold py-3.5 px-8 rounded-xl text-xs uppercase tracking-wider cursor-pointer w-full sm:w-auto transition-colors"
             >
               {loading ? 'Consulting Gemini AI...' : 'Generate Adaptive Weekly Plan'}
             </button>
@@ -315,7 +313,7 @@ export default function WorkoutSection({
           )}
 
           {/* Weekdays Tab Bar */}
-          <div className="flex border-b border-zinc-850 overflow-x-auto scrollbar-none pb-0.5">
+          <div className="flex border-b border-zinc-900 overflow-x-auto scrollbar-none pb-0.5">
             {DAYS_OF_WEEK.map((day) => {
               const isActive = activeDay === day;
               const isDayRest = workoutPlan.plan_data?.days?.[day]?.is_rest || workoutPlan.plan_data?.[day]?.is_rest;
@@ -323,44 +321,44 @@ export default function WorkoutSection({
                 <button
                   key={day}
                   onClick={() => setActiveDay(day)}
-                  className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all capitalize whitespace-nowrap cursor-pointer ${isActive ? 'border-orange-500 text-orange-500' : 'border-transparent text-zinc-400 hover:text-zinc-200'}`}
+                  className={`px-5 py-3 text-xs font-bold border-b-2 transition-all uppercase tracking-wider cursor-pointer whitespace-nowrap ${isActive ? 'border-orange-500 text-orange-500' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
                 >
                   {day}
-                  {isDayRest && <span className="text-[10px] text-zinc-500 block">Rest</span>}
+                  {isDayRest && <span className="text-[8px] text-zinc-650 block font-extrabold mt-0.5">Rest</span>}
                 </button>
               );
             })}
           </div>
 
           {/* Tab Content */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
+          <div className="stripe-card p-6 space-y-6">
             {!currentDayPlan || currentDayPlan.is_rest ? (
               <div className="text-center py-10 space-y-4">
-                <div className="bg-zinc-950 w-12 h-12 rounded-full flex items-center justify-center mx-auto border border-zinc-850">
-                  <svg className="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="bg-zinc-950 w-12 h-12 rounded-xl flex items-center justify-center mx-auto border border-zinc-850">
+                  <svg className="w-5 h-5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-white">Active Recovery Day</h3>
-                <p className="text-zinc-400 text-sm max-w-sm mx-auto">
+                <h3 className="text-md font-display font-extrabold text-white uppercase tracking-wider">Active Recovery Day</h3>
+                <p className="text-zinc-500 text-xs max-w-sm mx-auto leading-relaxed">
                   {currentDayPlan?.notes || 'No strenuous heavy weights scheduled. Prioritize light movement, yoga, and sleep to rebuild fibers.'}
                 </p>
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="flex flex-wrap gap-4 border-b border-zinc-850 pb-4">
-                  <div className="bg-zinc-950 border border-zinc-850 px-3.5 py-2 rounded-xl">
-                    <span className="text-[10px] text-zinc-500 block uppercase">Muscle Focus</span>
-                    <span className="text-sm font-bold text-white">{currentDayPlan.muscle_group}</span>
+                <div className="flex flex-wrap gap-3 border-b border-zinc-900 pb-5">
+                  <div className="bg-zinc-950 border border-zinc-850 px-4 py-2.5 rounded-xl">
+                    <span className="text-[9px] text-zinc-550 block uppercase font-bold tracking-wider">Muscle Focus</span>
+                    <span className="text-xs font-black text-white mt-0.5 block">{currentDayPlan.muscle_group}</span>
                   </div>
-                  <div className="bg-zinc-950 border border-zinc-850 px-3.5 py-2 rounded-xl">
-                    <span className="text-[10px] text-zinc-500 block uppercase">Est. Duration</span>
-                    <span className="text-sm font-bold text-white">{currentDayPlan.gym_duration_minutes} Mins</span>
+                  <div className="bg-zinc-950 border border-zinc-850 px-4 py-2.5 rounded-xl">
+                    <span className="text-[9px] text-zinc-550 block uppercase font-bold tracking-wider">Est. Duration</span>
+                    <span className="text-xs font-black text-white mt-0.5 block">{currentDayPlan.gym_duration_minutes} Mins</span>
                   </div>
                   {currentDayPlan.running && (
-                    <div className="bg-zinc-950 border border-zinc-850 px-3.5 py-2 rounded-xl">
-                      <span className="text-[10px] text-zinc-500 block uppercase">Running Session</span>
-                      <span className="text-sm font-bold text-white">
+                    <div className="bg-zinc-950 border border-zinc-850 px-4 py-2.5 rounded-xl">
+                      <span className="text-[9px] text-zinc-550 block uppercase font-bold tracking-wider">Running Session</span>
+                      <span className="text-xs font-black text-white mt-0.5 block">
                         {currentDayPlan.running.distance_km}km ({currentDayPlan.running.chunks})
                       </span>
                     </div>
@@ -370,34 +368,34 @@ export default function WorkoutSection({
                 {/* Pre-Workout Warm-Up Display */}
                 {currentDayPlan.pre_workout_warmup && (
                   <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl space-y-1">
-                    <span className="text-[10px] text-green-500 font-bold uppercase block tracking-wider">Pre-Workout Warm-Up Routine</span>
-                    <p className="text-sm text-zinc-300">{currentDayPlan.pre_workout_warmup}</p>
+                    <span className="text-[9px] text-green-500 font-bold uppercase block tracking-wider">Pre-Workout Warm-Up Routine</span>
+                    <p className="text-xs text-zinc-350 leading-relaxed">{currentDayPlan.pre_workout_warmup}</p>
                   </div>
                 )}
 
                 {currentDayPlan.running && (
                   <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl space-y-1">
-                    <span className="text-[10px] text-orange-500 font-bold uppercase block tracking-wider">Running Drill Instructions</span>
-                    <p className="text-sm text-zinc-300">{currentDayPlan.running.instructions}</p>
+                    <span className="text-[9px] text-orange-500 font-bold uppercase block tracking-wider">Running Drill Instructions</span>
+                    <p className="text-xs text-zinc-350 leading-relaxed">{currentDayPlan.running.instructions}</p>
                   </div>
                 )}
 
                 {/* Exercise Checklist */}
-                <div>
-                  <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider mb-3">Daily Exercises</h3>
+                <div className="space-y-4">
+                  <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Daily Exercises</h3>
                   <div className="space-y-3">
                     {(currentDayPlan.exercises || []).map((ex, idx) => {
                       const done = isCompleted(ex.name);
                       return (
                         <div
                           key={idx}
-                          className={`flex items-start justify-between p-4 rounded-xl border transition-all ${done ? 'bg-green-950/10 border-green-950' : 'bg-zinc-950 border-zinc-850 hover:border-zinc-800'}`}
+                          className={`flex items-start justify-between p-4 rounded-xl border transition-all ${done ? 'bg-green-950/5 border-green-950/60' : 'bg-zinc-950 border-zinc-850 hover:border-zinc-800'}`}
                         >
                           <div className="flex items-start space-x-3.5 flex-1 pr-4">
                             <button
                               onClick={() => onToggleExercise(ex.name, !done)}
                               disabled={!activeDayIsToday()}
-                              className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center transition-colors cursor-pointer border ${done ? 'bg-green-500 border-green-500 text-white' : 'border-zinc-700 bg-zinc-900 hover:border-orange-500'} disabled:opacity-50`}
+                              className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center transition-colors cursor-pointer border ${done ? 'bg-green-500 border-green-500 text-white' : 'border-zinc-800 bg-zinc-900 hover:border-orange-500'} disabled:opacity-50`}
                             >
                               {done && (
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -407,12 +405,12 @@ export default function WorkoutSection({
                             </button>
                             
                             <div>
-                              <span className={`text-sm font-bold text-white block ${done ? 'line-through text-zinc-500' : ''}`}>{ex.name}</span>
-                              <span className="text-xs text-zinc-400 block mt-0.5">
-                                Target: <strong className="text-zinc-200">{ex.muscle}</strong> | Sets: <strong className="text-zinc-200">{ex.sets}</strong> | Reps: <strong className="text-zinc-200">{ex.reps}</strong>
+                              <span className={`text-xs font-black text-white block ${done ? 'line-through text-zinc-550 font-bold' : ''}`}>{ex.name}</span>
+                              <span className="text-[10px] text-zinc-450 block mt-0.5 uppercase font-bold tracking-wide">
+                                Target: <strong className="text-zinc-300">{ex.muscle}</strong> | Sets: <strong className="text-zinc-300">{ex.sets}</strong> | Reps: <strong className="text-zinc-300">{ex.reps}</strong>
                               </span>
                               {ex.notes && (
-                                <p className="text-xs text-zinc-500 italic mt-1 leading-relaxed">{ex.notes}</p>
+                                <p className="text-[11px] text-zinc-500 italic mt-1.5 leading-relaxed">{ex.notes}</p>
                               )}
                             </div>
                           </div>
@@ -424,7 +422,7 @@ export default function WorkoutSection({
                               setSelectedExercise(ex);
                               setModalTab('demo');
                             }}
-                            className="flex-shrink-0 text-xs bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors cursor-pointer"
+                            className="flex-shrink-0 text-[10px] uppercase font-bold tracking-wider bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors cursor-pointer"
                           >
                             <span>Posture</span>
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -439,7 +437,7 @@ export default function WorkoutSection({
                 </div>
 
                 {!activeDayIsToday() && (
-                  <p className="text-xs text-zinc-500 text-center pt-2">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider text-center pt-2">
                     ⚠️ Exercise ticking is disabled for past or future days. Switch to today's weekday page to check them off.
                   </p>
                 )}
@@ -455,59 +453,59 @@ export default function WorkoutSection({
         const categoryLink = getMuscleWikiCategoryLink(selectedExercise.name, selectedExercise.muscle);
         
         return (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <div className="stripe-card max-w-2xl w-full p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
               <button
                 type="button"
                 onClick={() => setSelectedExercise(null)}
-                className="absolute top-4 right-4 text-zinc-450 hover:text-white text-xl font-bold cursor-pointer z-10"
+                className="absolute top-5 right-5 text-zinc-500 hover:text-white text-lg font-bold cursor-pointer z-10"
               >
                 ✕
               </button>
               
-              <div>
-                <span className="text-[10px] bg-orange-950/40 text-orange-400 border border-orange-900 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  Posture & Form Player
+              <div className="space-y-1 pr-6">
+                <span className="text-[9px] bg-orange-500/10 text-orange-400 border border-orange-950 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  Posture & Form Guide
                 </span>
-                <h2 className="text-xl font-bold text-white mt-2">{selectedExercise.name}</h2>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Target Muscle: <strong className="text-zinc-200">{selectedExercise.muscle}</strong> | Gender: <strong className="text-zinc-200 capitalize">{profile?.gender || 'male'}</strong>
+                <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight mt-1">{selectedExercise.name}</h2>
+                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
+                  Target: <strong className="text-zinc-300">{selectedExercise.muscle}</strong> | Gender: <strong className="text-zinc-300 capitalize">{profile?.gender || 'male'}</strong>
                 </p>
               </div>
 
               {/* Modal Body: Instructions + Visual Demo Area */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
                 {/* Instructions column */}
-                <div className="space-y-3 bg-zinc-950 border border-zinc-850 p-4 rounded-xl text-xs">
+                <div className="space-y-3.5 bg-zinc-950 border border-zinc-850 p-4 rounded-xl text-xs">
                   <div>
-                    <strong className="text-orange-400 uppercase tracking-wider text-[10px] block mb-1">1. Setup Position</strong>
-                    <p className="text-zinc-300 leading-relaxed">{posture.setup}</p>
+                    <strong className="text-orange-450 uppercase tracking-widest text-[9px] block mb-1">1. Setup Position</strong>
+                    <p className="text-zinc-350 leading-relaxed text-[11px]">{posture.setup}</p>
                   </div>
-                  <div className="pt-2 border-t border-zinc-900">
-                    <strong className="text-green-400 uppercase tracking-wider text-[10px] block mb-1">2. Execution</strong>
-                    <p className="text-zinc-300 leading-relaxed">{posture.execution}</p>
+                  <div className="pt-3 border-t border-zinc-900">
+                    <strong className="text-green-450 uppercase tracking-widest text-[9px] block mb-1">2. Execution</strong>
+                    <p className="text-zinc-350 leading-relaxed text-[11px]">{posture.execution}</p>
                   </div>
-                  <div className="pt-2 border-t border-zinc-900">
-                    <strong className="text-blue-400 uppercase tracking-wider text-[10px] block mb-1">3. Key Form Tips</strong>
-                    <p className="text-zinc-300 italic leading-relaxed">"{posture.tips}"</p>
+                  <div className="pt-3 border-t border-zinc-900">
+                    <strong className="text-blue-455 uppercase tracking-widest text-[9px] block mb-1">3. Form Guidance</strong>
+                    <p className="text-zinc-350 italic leading-relaxed text-[11px]">"{posture.tips}"</p>
                   </div>
                 </div>
 
                 {/* Embed/Animation Tabs Column */}
-                <div className="flex flex-col space-y-3">
+                <div className="flex flex-col space-y-4">
                   {/* Tab Selector */}
                   <div className="flex bg-zinc-950 border border-zinc-850 p-1 rounded-lg">
                     <button
                       type="button"
                       onClick={() => setModalTab('demo')}
-                      className={`flex-1 py-1 text-[10px] font-bold rounded cursor-pointer transition-colors ${modalTab === 'demo' ? 'bg-orange-500 text-white' : 'text-zinc-450 hover:text-white'}`}
+                      className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded cursor-pointer transition-colors ${modalTab === 'demo' ? 'bg-orange-500 text-white' : 'text-zinc-500 hover:text-white'}`}
                     >
                       Animated Motion
                     </button>
                     <button
                       type="button"
                       onClick={() => setModalTab('wiki')}
-                      className={`flex-1 py-1 text-[10px] font-bold rounded cursor-pointer transition-colors ${modalTab === 'wiki' ? 'bg-orange-500 text-white' : 'text-zinc-450 hover:text-white'}`}
+                      className={`flex-1 py-1.5 text-[9px] font-black uppercase tracking-wider rounded cursor-pointer transition-colors ${modalTab === 'wiki' ? 'bg-orange-500 text-white' : 'text-zinc-500 hover:text-white'}`}
                     >
                       MuscleWiki Portal
                     </button>
@@ -523,8 +521,8 @@ export default function WorkoutSection({
                           className="absolute inset-0 w-full h-full border-none opacity-85"
                           title="MuscleWiki Exercises"
                         />
-                        <div className="absolute bottom-2 inset-x-2 bg-zinc-900/90 border border-zinc-850 rounded-lg p-2 text-[10px] text-zinc-400 leading-normal pointer-events-none text-center">
-                          💡 If blockages occur, use the direct link below.
+                        <div className="absolute bottom-2 inset-x-2 bg-zinc-900/90 border border-zinc-850 rounded-lg p-2 text-[9px] text-zinc-500 uppercase font-bold tracking-wider pointer-events-none text-center">
+                          💡 If blockages occur, use the link below.
                         </div>
                       </>
                     )}
@@ -534,9 +532,9 @@ export default function WorkoutSection({
                     href={categoryLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 rounded-lg text-xs text-center transition-colors flex items-center justify-center space-x-2 cursor-pointer"
+                    className="bg-orange-500 hover:bg-orange-650 text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-wider text-center transition-colors flex items-center justify-center space-x-2 cursor-pointer"
                   >
-                    <span>Open Category on MuscleWiki</span>
+                    <span>Open on MuscleWiki</span>
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
