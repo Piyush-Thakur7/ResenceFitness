@@ -162,12 +162,19 @@ export default function Dashboard({
     return Math.round(targetBmi * hMeters * hMeters);
   }, [profile.height, profile.fitness_goal]);
 
+  const timeBasedGreeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Title greeting */}
       <div className="space-y-1">
         <h1 className="text-3xl font-display font-extrabold text-white tracking-tight uppercase">
-          Welcome back, {profile.full_name || 'Champion'}
+          {timeBasedGreeting}, {profile.full_name || 'Champion'}
         </h1>
         <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Here is your daily fitness and nutrition standing.</p>
       </div>
@@ -279,13 +286,20 @@ export default function Dashboard({
 
           <div className="flex items-center space-x-4 py-1">
             <div className="bg-orange-500/5 p-3.5 rounded-xl border border-orange-950/40">
-              <svg className="w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg className="w-6 h-6 text-orange-500 animate-flicker" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9.879z" />
               </svg>
             </div>
             <div>
-              <span className="text-3xl font-display font-extrabold text-white block">{streak?.current_streak || 0} Days</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-3xl font-display font-extrabold text-white block">{streak?.current_streak || 0} Days</span>
+                {streak?.current_streak > 0 && (
+                  <span className="bg-orange-500/10 text-orange-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded border border-orange-500/25 animate-bounce duration-1000">
+                    🔥 ON FIRE!
+                  </span>
+                )}
+              </div>
               <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider mt-0.5">Active Logging Streak</p>
             </div>
           </div>
