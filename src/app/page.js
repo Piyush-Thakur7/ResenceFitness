@@ -10,6 +10,7 @@ import SleepSection from '@/components/SleepSection';
 import BodyAssessmentSection from '@/components/BodyAssessmentSection';
 import ProgressSection from '@/components/ProgressSection';
 import MuscleExplorer from '@/components/MuscleExplorer';
+import AICoachSection from '@/components/AICoachSection';
 
 const LOGO_OPTIONS = [
   { id: 'logo_1', title: 'Option 1: Stylized "R" Mark', path: '/logos/logo_1.jpg', desc: 'Modern energy swoosh forming the letter "R" with orange and green gradients.' },
@@ -954,6 +955,7 @@ export default function Home() {
               { id: 'sleep', label: 'Sleep Logs', icon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' },
               { id: 'body', label: 'AI Assessment', icon: 'M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z' },
               { id: 'explorer', label: 'Muscle Explorer', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
+              { id: 'coach', label: 'AI Coach Chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
               { id: 'progress', label: 'Stats & Branding', icon: 'M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z' },
             ].map((tab) => {
               const active = activeTab === tab.id;
@@ -1041,6 +1043,13 @@ export default function Home() {
 
           {activeTab === 'explorer' && (
             <MuscleExplorer profile={profile} />
+          )}
+
+          {activeTab === 'coach' && (
+            <AICoachSection
+              profile={profile}
+              demoMode={demoMode}
+            />
           )}
 
           {activeTab === 'progress' && (

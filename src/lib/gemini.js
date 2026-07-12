@@ -279,3 +279,49 @@ function calculateAge(dobString) {
   }
   return age;
 }
+
+/**
+ * Interactive fitness chat with profile context
+ */
+export async function chatWithCoach(profile, messages) {
+  if (!genAI) {
+    throw new Error('Gemini API Key is not configured.');
+  }
+  
+  const age = calculateAge(profile.dob);
+  const systemInstruction = `
+    You are Resence AI Coach, an elite personal trainer and nutritionist.
+    You are speaking with a user who has the following profile:
+    - Age: ${age} years
+    - Gender: ${profile.gender || 'male'}
+    - Height: ${profile.height} cm
+    - Weight: ${profile.weight} kg
+    - Fitness Goal: ${profile.fitness_goal}
+    - Diet Preference: ${profile.diet_preference}
+    - Injuries/Limitations: ${profile.injuries || 'None'}
+    - Conditioning/Cardio Preference: ${profile.conditioning_preference || 'Running'}
+    
+    Answer their fitness, training, sleep, and nutrition questions.
+    Be motivational, professional, scientific, yet encouraging. Highlight concepts like "Discipline Equals Freedom" or "Every Day Is Day One" where appropriate.
+    Always format your responses in clean Markdown (use bullet points, bold tags, and clear sections).
+    Keep your answers concise, practical, and highly tailored to their specific goal (${profile.fitness_goal}) and limitations.
+    If they ask about exercises, describe proper form clearly. Do not use generic placeholders.
+  `;
+
+  // Filter messages to match role and parts format
+  const chatContents = messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }]
+  }));
+
+  const chatModel = genAI.getGenerativeModel({
+    model: modelName,
+    systemInstruction: systemInstruction
+  });
+
+  const result = await chatModel.generateContent({
+    contents: chatContents
+  });
+
+  return result.response.text();
+}
