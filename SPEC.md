@@ -1,19 +1,17 @@
-# Spec: AI Coach Chat Panel
+# Spec: Water Intake Tracker
 
-Expose a new "AI Coach" chat panel within the application dashboard, allowing users to converse in real-time with an AI personal trainer powered by Gemini 3.5.
+Expose a visual, interactive **Water Intake Tracker** card on the main dashboard, letting users log their daily hydration and track it against a custom target calculated from their body weight.
 
 ## Proposed Changes:
-1. **API Endpoint (`src/app/api/chat-coach/route.js`)**:
-   - Create a new API route `/api/chat-coach` that receives the user's chat history and profile.
-   - Inject the profile details (age, height, weight, injuries, goals, conditioning, diet preference) as a system instruction to Gemini.
-   - Use the standard Google Gen AI SDK to stream or generate the response.
-2. **AI Coach Tab Panel (`src/components/AICoachSection.js`)**:
-   - Create a clean, premium, dark-mode chat interface with scrollable message logs, typing indicators, and motivational template helper chips (e.g., "Customize my workout for lower back pain", "High-protein veg ideas").
-3. **Register Tab in Navigation (`src/app/page.js`)**:
-   - Add `"coach"` as an option in `activeTab`.
-   - Update Sidebar navigation options in `page.js` to render the "AI Coach" button with a nice chat icon.
-   - Render `<AICoachSection profile={profile} />` under the active tab conditional.
+1. **Target Calculation**:
+   - Hydration target formula: `Weight (kg) * 35` ml (e.g., a 70kg user needs 2450ml or ~2.5L daily).
+2. **Dashboard UI Integration (`src/components/Dashboard.js`)**:
+   - Add a premium **Hydration Tracker** card next to the existing task lists.
+   - Include a progress indicator showing current vs target intake.
+   - Add quick tap buttons: `+ 250ml (Cup)` and `+ 750ml (Bottle)`.
+   - Add a `Reset` button to start fresh.
+   - Persist daily water logs in LocalStorage using user-specific keys (`water_log_${userId}_${dateKey}`) to ensure session persistence in both live and offline modes.
 
 ## Verification Plan:
-- Execute `npm.cmd run build` to verify clean compilation.
-- Commit changes and push to trigger automated deployment.
+- Execute `npm.cmd run build` to confirm compilation success.
+- Push changes to git to trigger CodeRabbit review and Vercel live deployment.

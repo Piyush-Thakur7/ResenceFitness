@@ -12,9 +12,39 @@ export default function Dashboard({
   sleepLog = null,
 }) {
   const [clientToday, setClientToday] = useState('');
+  const [waterIntake, setWaterIntake] = useState(0);
+
+  const waterTarget = useMemo(() => {
+    const w = profile?.weight || 70;
+    return Math.round(w * 35);
+  }, [profile?.weight]);
+
   useEffect(() => {
     setClientToday(new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase());
-  }, []);
+    
+    if (profile?.id) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const val = localStorage.getItem(`water_${profile.id}_${todayStr}`);
+      if (val) {
+        setWaterIntake(parseInt(val));
+      } else {
+        setWaterIntake(0);
+      }
+    }
+  }, [profile?.id]);
+
+  const handleLogWater = (amount) => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const newAmount = waterIntake + amount;
+    setWaterIntake(newAmount);
+    localStorage.setItem(`water_${profile.id}_${todayStr}`, newAmount.toString());
+  };
+
+  const handleResetWater = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    setWaterIntake(0);
+    localStorage.removeItem(`water_${profile.id}_${todayStr}`);
+  };
 
   // 1. BMI Calculation
   const bmiData = useMemo(() => {
@@ -343,22 +373,76 @@ export default function Dashboard({
         </div>
       </div>
 
-      {/* Sleep Quick Summary */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-        <div>
-          <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider mb-1">Rest & Recovery</h2>
-          <p className="text-xs text-zinc-400">Recommended Sleep target calculated from goal: <strong className="text-orange-400">{sleepLog?.recommended_hours || 8} hours</strong></p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-850">
-            <span className="text-xs text-zinc-500 block">Logged Sleep</span>
-            <span className="text-sm font-bold text-white">{sleepLog?.actual_hours || 0} Hours</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Sleep Quick Summary */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider mb-1.5 flex items-center">
+              <span className="mr-2">🌙</span> Rest & Recovery
+            </h2>
+            <p className="text-xs text-zinc-400">Sleep target based on goal: <strong className="text-orange-400">{sleepLog?.recommended_hours || 8} hours</strong></p>
           </div>
-          <span className="text-xs text-zinc-400">
-            {sleepLog?.actual_hours >= sleepLog?.recommended_hours
-              ? '✅ Target achieved for recovery'
-              : '💤 Prioritize rest for optimal muscle recovery'}
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-zinc-950 px-4 py-2.5 rounded-xl border border-zinc-850">
+              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Logged Sleep</span>
+              <span className="text-sm font-bold text-white">{sleepLog?.actual_hours || 0} Hours</span>
+            </div>
+            <span className="text-xs text-zinc-400">
+              {sleepLog?.actual_hours >= (sleepLog?.recommended_hours || 8)
+                ? '✅ Target achieved for recovery'
+                : '💤 Prioritize rest for optimal recovery'}
+            </span>
+          </div>
+        </div>
+
+        {/* Water Hydration Tracker */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <div className="flex justify-between items-center mb-1.5">
+              <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider flex items-center">
+                <span className="mr-2">💧</span> Hydration Tracker
+              </h2>
+              <span className="text-[10px] text-zinc-400 font-semibold bg-zinc-950 border border-zinc-850 px-2 py-0.5 rounded-full">
+                Target: {waterTarget} ml
+              </span>
+            </div>
+            {/* Progress Bar */}
+            <div className="space-y-2 mt-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-zinc-400">Hydration progress</span>
+                <span className="font-semibold text-orange-400">{waterIntake} / {waterTarget} ml</span>
+              </div>
+              <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
+                <div
+                  className="bg-orange-500 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min((waterIntake / waterTarget) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleLogWater(250)}
+                className="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer transition-colors"
+              >
+                +250ml 🥛
+              </button>
+              <button
+                onClick={() => handleLogWater(750)}
+                className="bg-zinc-950 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer transition-colors"
+              >
+                +750ml 💧
+              </button>
+            </div>
+            <button
+              onClick={handleResetWater}
+              className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors cursor-pointer text-xs"
+              title="Reset today's water logs"
+            >
+              Reset 🔄
+            </button>
+          </div>
         </div>
       </div>
     </div>
