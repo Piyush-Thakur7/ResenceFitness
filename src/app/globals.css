@@ -141,3 +141,19 @@ h1, h2, h3, h4, h5, h6, .font-display {
   left: 50%;
   transform: translateX(-50%);
 }
+
+/* Accessibility overrides: enforce custom micro-labels to be at least 12px (text-xs) */
+.text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\] {
+  font-size: 12px !important;
+}
+
+/* Global keyboard focus indicators for accessibility */
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid #ff6b35 !important;
+  outline-offset: 2px !important;
+}
+
+/* Accessibility contrast overrides: force muted subtexts to pass 4.5:1 WCAG AA contrast threshold */
+.text-zinc-500, .text-zinc-550, .text-zinc-600 {
+  color: #a1a1aa !important;
+}
