@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 
+// Generic Portion Templates (Fallback / Verification Data)
 export default function Dashboard({
   profile,
   streak,
@@ -49,23 +50,27 @@ export default function Dashboard({
 
   // 1. BMI Calculation
   const bmiData = useMemo(() => {
-    if (!profile.weight || !profile.height) return { bmi: 0, category: 'N/A', color: 'text-zinc-400' };
+    if (!profile.weight || !profile.height) return { bmi: 0, category: 'N/A', color: 'text-zinc-500', borderColor: 'border-zinc-800/80' };
     const hMeters = profile.height / 100;
     const bmi = parseFloat((profile.weight / (hMeters * hMeters)).toFixed(1));
     let category = 'Normal';
-    let color = 'text-green-500';
+    let color = 'text-green-400';
+    let borderColor = 'border-green-500/20';
 
     if (bmi < 18.5) {
       category = 'Underweight';
-      color = 'text-yellow-500';
+      color = 'text-yellow-400';
+      borderColor = 'border-yellow-500/20';
     } else if (bmi >= 25 && bmi < 29.9) {
       category = 'Overweight';
-      color = 'text-orange-500';
+      color = 'text-orange-400';
+      borderColor = 'border-orange-500/20';
     } else if (bmi >= 30) {
       category = 'Obese';
-      color = 'text-red-500';
+      color = 'text-red-400';
+      borderColor = 'border-red-500/20';
     }
-    return { bmi, category, color };
+    return { bmi, category, color, borderColor };
   }, [profile.weight, profile.height]);
 
   // 2. Workout Completion Rate for today
@@ -73,7 +78,6 @@ export default function Dashboard({
     if (!workoutPlan || !clientToday) return { total: 0, completed: 0, percentage: 0 };
     const today = clientToday;
     
-    // Find matching day in plan
     const daysKeyMap = {
       monday: 'monday', tuesday: 'tuesday', wednesday: 'wednesday',
       thursday: 'thursday', friday: 'friday', saturday: 'saturday', sunday: 'sunday'
@@ -94,7 +98,6 @@ export default function Dashboard({
 
   // 3. Nutrition Summary
   const nutritionSummary = useMemo(() => {
-    // Default targets
     const targets = dietPlan?.plan_data?.daily_targets || {
       calories: 2000,
       protein: 120,
@@ -102,7 +105,6 @@ export default function Dashboard({
       fat: 65,
     };
 
-    // Calculate totals consumed today
     let consumed = { calories: 0, protein: 0, carbs: 0, fat: 0 };
     dietLogs.forEach((log) => {
       consumed.calories += Number(log.calories || 0);
@@ -111,7 +113,6 @@ export default function Dashboard({
       consumed.fat += Number(log.fat || 0);
     });
 
-    // Make numbers clean
     consumed.calories = Math.round(consumed.calories);
     consumed.protein = Math.round(consumed.protein);
     consumed.carbs = Math.round(consumed.carbs);
@@ -162,161 +163,165 @@ export default function Dashboard({
   }, [profile.height, profile.fitness_goal]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-300">
       {/* Title greeting */}
-      <div>
-        <h1 className="text-2xl font-bold text-white sm:text-3xl">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-display font-extrabold text-white tracking-tight uppercase">
           Welcome back, {profile.full_name || 'Champion'}
         </h1>
-        <p className="text-zinc-400 text-sm mt-1">Here is your daily fitness and nutrition standing.</p>
+        <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Here is your daily fitness and nutrition standing.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Metric Card 1: BMI & Profile Summary */}
-        <div className="stripe-card p-5 space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
-            <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Body Profile</h2>
-            <span className="text-xs bg-orange-950/40 text-orange-400 border border-orange-900 px-2 py-0.5 rounded-full font-medium">
-              Goal: {profile.fitness_goal}
+        <div className="stripe-card p-6 flex flex-col justify-between space-y-6">
+          <div className="flex justify-between items-center pb-3 border-b border-zinc-900">
+            <h2 className="text-zinc-400 font-bold text-xs uppercase tracking-wider">Body Profile</h2>
+            <span className="text-[10px] bg-orange-500/10 text-orange-400 border border-orange-950 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wide">
+              {profile.fitness_goal}
             </span>
           </div>
 
-          <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-extrabold text-white">{bmiData.bmi}</span>
-            <span className={`text-sm font-semibold ${bmiData.color}`}>{bmiData.category} BMI</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 pt-2 text-center">
-            <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Height</span>
-              <span className="text-sm font-bold text-zinc-200">{profile.height} cm</span>
-            </div>
-            <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Current</span>
-              <span className="text-sm font-bold text-zinc-200">{profile.weight} kg</span>
-            </div>
-            <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-[10px] text-orange-400 block uppercase font-bold">Target Weight</span>
-              <span className="text-sm font-bold text-orange-500">{targetWeight} kg</span>
-            </div>
-            <div className="bg-zinc-950 p-2 rounded-lg border border-zinc-850">
-              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Age</span>
-              <span className="text-sm font-bold text-zinc-200">{age} yrs</span>
+          <div className="space-y-2">
+            <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider block">Current Status</span>
+            <div className="flex items-baseline space-x-2.5">
+              <span className="text-4xl font-display font-extrabold text-white">{bmiData.bmi}</span>
+              <span className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${bmiData.borderColor} ${bmiData.color}`}>
+                {bmiData.category} BMI
+              </span>
             </div>
           </div>
 
-          <div className="text-xs text-zinc-400">
-            <span className="font-semibold block mb-1">Preferences & Health</span>
-            Diet: <strong className="text-zinc-200">{profile.diet_preference}</strong> | Injuries:{' '}
-            <strong className="text-zinc-200">{profile.injuries || 'None declared'}</strong>
+          <div className="grid grid-cols-2 gap-2 pt-1 text-center">
+            <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+              <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">Height</span>
+              <span className="text-xs font-extrabold text-zinc-200 mt-0.5 block">{profile.height} cm</span>
+            </div>
+            <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+              <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">Current</span>
+              <span className="text-xs font-extrabold text-zinc-200 mt-0.5 block">{profile.weight} kg</span>
+            </div>
+            <div className="bg-zinc-950 p-2.5 rounded-xl border border-orange-950/40">
+              <span className="text-[9px] text-orange-400 block uppercase font-bold tracking-wider">Target Weight</span>
+              <span className="text-xs font-extrabold text-orange-400 mt-0.5 block">{targetWeight} kg</span>
+            </div>
+            <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+              <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">Age</span>
+              <span className="text-xs font-extrabold text-zinc-200 mt-0.5 block">{age} yrs</span>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-zinc-500 border-t border-zinc-900 pt-3 flex justify-between">
+            <span>Diet: <strong className="text-zinc-300 font-bold">{profile.diet_preference}</strong></span>
+            <span>Injuries: <strong className="text-zinc-300 font-bold">{profile.injuries || 'None'}</strong></span>
           </div>
         </div>
 
         {/* Metric Card 2: Today's Tasks */}
-        <div className="stripe-card p-5 space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
-            <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Today's Workout</h2>
+        <div className="stripe-card p-6 flex flex-col justify-between space-y-6">
+          <div className="flex justify-between items-center pb-3 border-b border-zinc-900">
+            <h2 className="text-zinc-400 font-bold text-xs uppercase tracking-wider">Today's Workout</h2>
             {workoutCompletion.isRest ? (
-              <span className="text-xs bg-zinc-800 text-zinc-400 px-2.5 py-0.5 rounded-full font-medium border border-zinc-700">Rest Day</span>
+              <span className="text-[10px] bg-zinc-900 text-zinc-500 border border-zinc-850 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Rest Day</span>
             ) : (
-              <span className="text-xs bg-green-950/40 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-medium">Active</span>
+              <span className="text-[10px] bg-green-500/10 text-green-400 border border-green-950 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Active</span>
             )}
           </div>
 
-          <div className="flex flex-col items-center justify-center py-2">
+          <div className="flex flex-col items-center justify-center py-1">
             <div className="relative w-28 h-28 flex items-center justify-center">
-              {/* SVG Circular Progress */}
-              <svg className="w-full h-full transform -rotate-95" viewBox="0 0 36 36">
-                <path
-                  className="text-zinc-850"
-                  strokeWidth="3"
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <circle
+                  className="text-zinc-900"
+                  strokeWidth="3.2"
                   stroke="currentColor"
                   fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  cx="18"
+                  cy="18"
+                  r="15.9155"
                 />
-                <path
+                <circle
                   className="text-orange-500 transition-all duration-500"
                   strokeDasharray={`${workoutCompletion.percentage}, 100`}
                   strokeWidth="3.2"
                   strokeLinecap="round"
                   stroke="currentColor"
                   fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  cx="18"
+                  cy="18"
+                  r="15.9155"
                 />
               </svg>
               <div className="absolute flex flex-col items-center">
-                <span className="text-xl font-black text-white">{workoutCompletion.percentage}%</span>
-                <span className="text-[10px] text-zinc-400">completed</span>
+                <span className="text-2xl font-display font-extrabold text-white">{workoutCompletion.percentage}%</span>
+                <span className="text-[8px] text-zinc-500 uppercase font-bold tracking-wider mt-0.5">completed</span>
               </div>
             </div>
             {!workoutCompletion.isRest && (
-              <p className="text-xs text-zinc-300 mt-4 font-medium">
+              <p className="text-[11px] text-zinc-300 mt-5 font-semibold text-center leading-relaxed">
                 {workoutCompletion.completed} of {workoutCompletion.total} exercises ticked off today
               </p>
             )}
             {workoutCompletion.isRest && (
-              <p className="text-xs text-zinc-400 mt-4 font-medium">Enjoy your active recovery rest day!</p>
+              <p className="text-[11px] text-zinc-400 mt-5 font-semibold text-center leading-relaxed">Enjoy your active recovery rest day!</p>
             )}
           </div>
+
+          <div className="h-[23px]" /> {/* Spacer to balance height */}
         </div>
 
         {/* Metric Card 3: Motivation / Streak */}
-        <div className="stripe-card p-5 space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
-            <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Consistency</h2>
-            <span className="text-xs bg-green-950/40 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-medium">Streak</span>
+        <div className="stripe-card p-6 flex flex-col justify-between space-y-6">
+          <div className="flex justify-between items-center pb-3 border-b border-zinc-900">
+            <h2 className="text-zinc-400 font-bold text-xs uppercase tracking-wider">Consistency</h2>
+            <span className="text-[10px] bg-green-500/10 text-green-400 border border-green-950 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Streak</span>
           </div>
 
-          <div className="flex items-center space-x-4 py-2">
-            <div className="bg-orange-950/40 p-4 rounded-2xl border border-orange-900">
-              <svg className="w-8 h-8 text-orange-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <div className="flex items-center space-x-4 py-1">
+            <div className="bg-orange-500/5 p-3.5 rounded-xl border border-orange-950/40">
+              <svg className="w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
             <div>
-              <span className="text-3xl font-extrabold text-white">{streak?.current_streak || 0} Days</span>
-              <p className="text-xs text-zinc-400 mt-0.5">Consecutive active logging streak</p>
+              <span className="text-3xl font-display font-extrabold text-white block">{streak?.current_streak || 0} Days</span>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider mt-0.5">Active Logging Streak</p>
             </div>
           </div>
 
-          {/* Simple weekly summary (e.g. 5/6 days completed this week) */}
-          <div className="pt-2 border-t border-zinc-850">
-            <h3 className="text-xs font-semibold text-zinc-300 mb-2">Weekly Goal Completion</h3>
+          <div className="border-t border-zinc-900 pt-3 space-y-2">
+            <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Weekly Progress</h3>
             <div className="flex space-x-1.5 justify-between">
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => {
-                // Find if completed in weekly progress array
                 const progressArr = streak?.weekly_progress || [];
                 const isCompleted = progressArr[idx] === true;
                 return (
                   <div key={idx} className="flex flex-col items-center flex-1">
-                    <span className="text-[10px] text-zinc-500 mb-1">{day}</span>
-                    <div className={`w-full h-2.5 rounded-sm transition-colors ${isCompleted ? 'bg-green-500' : 'bg-zinc-850'}`} />
+                    <span className="text-[9px] font-bold text-zinc-500 mb-1">{day}</span>
+                    <div className={`w-full h-2 rounded transition-all duration-300 ${isCompleted ? 'bg-green-500 shadow-sm shadow-green-500/20' : 'bg-zinc-900'}`} />
                   </div>
                 );
               })}
             </div>
-            <p className="text-[10px] text-zinc-500 mt-2">
-              Note: Completions are updated daily when workouts are logged.
-            </p>
           </div>
         </div>
       </div>
 
       {/* Daily Nutrition Tracker */}
-      <div className="stripe-card p-5">
-        <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider mb-4">Today's Nutrition Summary</h2>
+      <div className="stripe-card p-6 space-y-5">
+        <h2 className="text-zinc-300 font-bold text-xs uppercase tracking-widest">Today's Nutrition Summary</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Calorie gauge */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="font-semibold text-zinc-300">Calories</span>
-              <span className="text-zinc-400">
-                {nutritionSummary.consumed.calories} / {nutritionSummary.targets.calories} kcal
+          <div className="space-y-2.5">
+            <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider">
+              <span className="text-zinc-400">Calories</span>
+              <span className="text-zinc-300">
+                {nutritionSummary.consumed.calories} <span className="text-zinc-500">/ {nutritionSummary.targets.calories} kcal</span>
               </span>
             </div>
-            <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
+            <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
               <div
                 className="bg-orange-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((nutritionSummary.consumed.calories / nutritionSummary.targets.calories) * 100, 100)}%` }}
@@ -325,14 +330,14 @@ export default function Dashboard({
           </div>
 
           {/* Protein gauge */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="font-semibold text-zinc-300">Protein</span>
-              <span className="text-zinc-400">
-                {nutritionSummary.consumed.protein} / {nutritionSummary.targets.protein}g
+          <div className="space-y-2.5">
+            <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider">
+              <span className="text-zinc-400">Protein</span>
+              <span className="text-zinc-300">
+                {nutritionSummary.consumed.protein}g <span className="text-zinc-500">/ {nutritionSummary.targets.protein}g</span>
               </span>
             </div>
-            <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
+            <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
               <div
                 className="bg-green-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((nutritionSummary.consumed.protein / nutritionSummary.targets.protein) * 100, 100)}%` }}
@@ -341,14 +346,14 @@ export default function Dashboard({
           </div>
 
           {/* Carbs gauge */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="font-semibold text-zinc-300">Carbohydrates</span>
-              <span className="text-zinc-400">
-                {nutritionSummary.consumed.carbs} / {nutritionSummary.targets.carbs}g
+          <div className="space-y-2.5">
+            <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider">
+              <span className="text-zinc-400">Carbohydrates</span>
+              <span className="text-zinc-300">
+                {nutritionSummary.consumed.carbs}g <span className="text-zinc-500">/ {nutritionSummary.targets.carbs}g</span>
               </span>
             </div>
-            <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
+            <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
               <div
                 className="bg-blue-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((nutritionSummary.consumed.carbs / nutritionSummary.targets.carbs) * 100, 100)}%` }}
@@ -357,14 +362,14 @@ export default function Dashboard({
           </div>
 
           {/* Fat gauge */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="font-semibold text-zinc-300">Fats</span>
-              <span className="text-zinc-400">
-                {nutritionSummary.consumed.fat} / {nutritionSummary.targets.fat}g
+          <div className="space-y-2.5">
+            <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider">
+              <span className="text-zinc-400">Fats</span>
+              <span className="text-zinc-300">
+                {nutritionSummary.consumed.fat}g <span className="text-zinc-500">/ {nutritionSummary.targets.fat}g</span>
               </span>
             </div>
-            <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
+            <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
               <div
                 className="bg-purple-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${Math.min((nutritionSummary.consumed.fat / nutritionSummary.targets.fat) * 100, 100)}%` }}
@@ -376,46 +381,48 @@ export default function Dashboard({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Sleep Quick Summary */}
-        <div className="stripe-card p-5 flex flex-col justify-between space-y-4">
-          <div>
-            <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider mb-1.5 flex items-center">
+        <div className="stripe-card p-6 flex flex-col justify-between space-y-5">
+          <div className="space-y-1">
+            <h2 className="text-zinc-300 font-bold text-xs uppercase tracking-widest flex items-center">
               <span className="mr-2">🌙</span> Rest & Recovery
             </h2>
-            <p className="text-xs text-zinc-400">Sleep target based on goal: <strong className="text-orange-400">{sleepLog?.recommended_hours || 8} hours</strong></p>
+            <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-wide">
+              Sleep target: <strong className="text-orange-400 font-extrabold">{sleepLog?.recommended_hours || 8} hours</strong>
+            </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center justify-between gap-3 pt-1 border-t border-zinc-900">
             <div className="bg-zinc-950 px-4 py-2.5 rounded-xl border border-zinc-850">
-              <span className="text-[10px] text-zinc-500 block uppercase font-bold">Logged Sleep</span>
-              <span className="text-sm font-bold text-white">{sleepLog?.actual_hours || 0} Hours</span>
+              <span className="text-[9px] text-zinc-500 block uppercase font-bold tracking-wider">Logged Sleep</span>
+              <span className="text-xs font-extrabold text-white mt-0.5 block">{sleepLog?.actual_hours || 0} Hours</span>
             </div>
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs font-semibold text-zinc-300">
               {sleepLog?.actual_hours >= (sleepLog?.recommended_hours || 8)
-                ? '✅ Target achieved for recovery'
-                : '💤 Prioritize rest for optimal recovery'}
+                ? '✅ Recovery targets achieved'
+                : '💤 Prioritize sleep repair logs'}
             </span>
           </div>
         </div>
 
         {/* Water Hydration Tracker */}
-        <div className="stripe-card p-5 flex flex-col justify-between space-y-4">
+        <div className="stripe-card p-6 flex flex-col justify-between space-y-5">
           <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider flex items-center">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-zinc-300 font-bold text-xs uppercase tracking-widest flex items-center">
                 <span className="mr-2">💧</span> Hydration Tracker
               </h2>
-              <span className="text-[10px] text-zinc-400 font-semibold bg-zinc-950 border border-zinc-850 px-2 py-0.5 rounded-full">
+              <span className="text-[9px] text-zinc-400 font-extrabold bg-zinc-950 border border-zinc-850 px-2 py-0.5 rounded-full uppercase tracking-wider">
                 Target: {waterTarget} ml
               </span>
             </div>
             {/* Progress Bar */}
-            <div className="space-y-2 mt-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-zinc-400">Hydration progress</span>
-                <span className={`font-semibold ${waterIntake >= waterTarget ? 'text-green-400' : 'text-orange-400'}`}>
-                  {waterIntake} / {waterTarget} ml
+            <div className="space-y-2.5 mt-3">
+              <div className="flex justify-between text-[11px] font-bold uppercase tracking-wide">
+                <span className="text-zinc-500">Intake Progress</span>
+                <span className={`font-extrabold ${waterIntake >= waterTarget ? 'text-green-400' : 'text-orange-400'}`}>
+                  {waterIntake} <span className="text-zinc-500">/ {waterTarget} ml</span>
                 </span>
               </div>
-              <div className="w-full bg-zinc-950 h-3 rounded-full overflow-hidden border border-zinc-850">
+              <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
                     waterIntake >= waterTarget ? 'bg-green-500 shadow-sm shadow-green-500/20' : 'bg-orange-500'
@@ -425,24 +432,24 @@ export default function Dashboard({
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-zinc-900">
             <div className="flex gap-2">
               <button
                 onClick={() => handleLogWater(250)}
-                className="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer transition-colors"
+                className="bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95"
               >
                 +250ml 🥛
               </button>
               <button
                 onClick={() => handleLogWater(750)}
-                className="bg-zinc-950 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-[10px] font-semibold cursor-pointer transition-colors"
+                className="bg-zinc-950 hover:bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-300 px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95"
               >
                 +750ml 💧
               </button>
             </div>
             <button
               onClick={handleResetWater}
-              className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors cursor-pointer text-xs"
+              className="text-zinc-500 hover:text-red-400 py-1.5 px-3 transition-colors cursor-pointer text-[10px] uppercase font-bold tracking-wider"
               title="Reset today's water logs"
             >
               Reset 🔄
