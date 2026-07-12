@@ -420,12 +420,17 @@ export default function Dashboard({
                 <span className="text-zinc-500">Intake Progress</span>
                 <span className={`font-extrabold ${waterIntake >= waterTarget ? 'text-green-400' : 'text-orange-400'}`}>
                   {waterIntake} <span className="text-zinc-500">/ {waterTarget} ml</span>
+                  {waterIntake > waterTarget && (
+                    <span className="text-[9px] bg-green-500/10 text-green-400 border border-green-950/50 px-1.5 py-0.5 rounded-md font-black ml-2 uppercase animate-pulse">
+                      +{waterIntake - waterTarget}ml Over
+                    </span>
+                  )}
                 </span>
               </div>
               <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    waterIntake >= waterTarget ? 'bg-green-500 shadow-sm shadow-green-500/20' : 'bg-orange-500'
+                    waterIntake >= waterTarget ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.4)]' : 'bg-orange-500'
                   }`}
                   style={{ width: `${Math.min((Number(waterIntake) / Number(waterTarget || 1)) * 100, 100)}%` }}
                 />
