@@ -963,7 +963,7 @@ export default function Home() {
 
   // Full Dashboard Application View
   return (
-    <div className="min-h-screen premium-mesh-bg text-white flex flex-col">
+    <div className="h-screen premium-mesh-bg text-white flex flex-col overflow-hidden">
       {/* Top Banner Alert when in Demo Mode */}
       {demoMode && (
         <div className="bg-orange-500/10 border-b border-orange-950 text-orange-400 py-1.5 px-4 text-[10px] text-center font-medium tracking-wide">
@@ -1012,7 +1012,7 @@ export default function Home() {
       </header>
 
       {/* Main layout containing Sidebar navigation and tabs content */}
-      <div className="flex-1 flex flex-col md:flex-row">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Sidebar Nav (Desktop only) */}
         <aside className="hidden md:block w-64 glass-sidebar p-4 space-y-4">
           <nav className="flex md:flex-col overflow-x-auto md:overflow-visible gap-2 pb-2 md:pb-0 scrollbar-none">
