@@ -1227,17 +1227,26 @@ export default function DietSection({
                   {dietLogs.map((log, idx) => {
                     const cleanName = log.meal_name.split('|||')[0];
                     return (
-                      <div key={idx} className="bg-zinc-950 border border-zinc-855 p-4 rounded-xl flex items-center justify-between">
-                        <div>
-                          <span className="text-[9px] bg-zinc-900 text-zinc-500 border border-zinc-850 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider mr-2">
-                            {log.meal_type}
-                          </span>
-                          <strong className="text-xs text-white font-bold">{cleanName}</strong>
-                          <div className="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-wider">
-                            Protein: {log.protein}g | Carbs: {log.carbs}g | Fat: {log.fat}g
+                      <div key={idx} className="bg-zinc-950 border border-zinc-855 p-4 rounded-xl flex items-center justify-between gap-4">
+                        <div className="flex items-center space-x-3 min-w-0">
+                          {log.photo_url && (
+                            <div className="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-850 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                              <img src={log.photo_url} alt={cleanName} className="w-full h-full object-cover" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="flex items-center flex-wrap gap-1.5 mb-1">
+                              <span className="text-[9px] bg-zinc-900 text-zinc-500 border border-zinc-850 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                {log.meal_type}
+                              </span>
+                            </div>
+                            <strong className="text-xs text-white font-bold block truncate">{cleanName}</strong>
+                            <div className="text-[10px] text-zinc-500 mt-0.5 uppercase font-bold tracking-wider whitespace-nowrap overflow-hidden text-ellipsis">
+                              P: {log.protein}g | C: {log.carbs}g | F: {log.fat}g
+                            </div>
                           </div>
                         </div>
-                        <span className="text-xs text-orange-400 font-bold">{log.calories} kcal</span>
+                        <span className="text-xs text-orange-400 font-bold flex-shrink-0">{log.calories} kcal</span>
                       </div>
                     );
                   })}

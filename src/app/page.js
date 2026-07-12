@@ -171,7 +171,39 @@ export default function Home() {
     if (wPlan?.[0]) setWorkoutPlan(wPlan[0]);
     if (dPlan?.[0]) setDietPlan(dPlan[0]);
     if (wLogs) setWorkoutLogs(wLogs);
-    if (dLogs) setDietLogs(dLogs);
+    
+    // Resolve diet log meal photo urls to signed urls
+    if (dLogs) {
+      const resolvedDietLogs = await Promise.all(
+        dLogs.map(async (log) => {
+          if (
+            log.photo_url && 
+            !log.photo_url.startsWith('http://') && 
+            !log.photo_url.startsWith('https://') && 
+            !log.photo_url.startsWith('/') &&
+            !log.photo_url.startsWith('blob:') &&
+            !log.photo_url.startsWith('data:')
+          ) {
+            try {
+              const { data, error } = await supabase.storage
+                .from('meal-photos')
+                .createSignedUrl(log.photo_url, 3600);
+              if (error) {
+                console.error('Error generating signed url for meal', log.photo_url, error);
+                return log;
+              }
+              return { ...log, photo_url: data?.signedUrl || log.photo_url };
+            } catch (err) {
+              console.error('Error creating signed url for meal', err);
+              return log;
+            }
+          }
+          return log;
+        })
+      );
+      setDietLogs(resolvedDietLogs);
+    }
+    
     if (sLog) setSleepLog(sLog);
     if (sLogs) setSleepLogs(sLogs);
     if (wHist) setWeightHistory(wHist);
