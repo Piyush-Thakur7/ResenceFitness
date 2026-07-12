@@ -1,31 +1,36 @@
-import { NextResponse } from 'next/server';
-import { chatWithCoach } from '@/lib/gemini';
+import { chatWithCoachStream } from '@/lib/gemini';
 
 /**
- * POST handler for AI Coach chat requests. Handles profile context injections.
+ * POST handler for AI Coach chat requests. Streams text chunks directly.
  * @param {Request} req - Next.js Request container.
- * @returns {Promise<NextResponse>} Next.js JSON Response.
+ * @returns {Promise<Response>} Next.js Stream Response.
  */
 export async function POST(req) {
   try {
     const { profile, messages } = await req.json();
 
     if (!profile) {
-      return NextResponse.json({ error: 'Profile data is required' }, { status: 400 });
+      return Response.json({ error: 'Profile data is required' }, { status: 400 });
     }
 
     if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
+      return Response.json({ error: 'Messages are required' }, { status: 400 });
     }
 
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your-gemini-api-key') {
-      return NextResponse.json({ error: 'Gemini API Key is missing' }, { status: 501 });
+      return Response.json({ error: 'Gemini API Key is missing' }, { status: 501 });
     }
 
-    const responseText = await chatWithCoach(profile, messages);
-    return NextResponse.json({ responseText });
+    const stream = await chatWithCoachStream(profile, messages);
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
     console.error('Gemini Chat API error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return Response.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

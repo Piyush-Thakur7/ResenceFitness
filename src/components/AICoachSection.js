@@ -65,24 +65,57 @@ How can I help you optimize your training, recovery, or diet structure today? Re
 
     try {
       const chatHistory = [...messages, userMessage];
+      setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
       const res = await fetch('/api/chat-coach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profile, messages: chatHistory }),
       });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: data.responseText }]);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let accumulatedText = '';
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: !done });
+          accumulatedText += chunk;
+          setMessages((prev) => {
+            const updated = [...prev];
+            if (updated.length > 0) {
+              updated[updated.length - 1] = {
+                role: 'assistant',
+                content: accumulatedText,
+              };
+            }
+            return updated;
+          });
+        }
+      }
     } catch (err) {
       console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: `⚠️ *Plan Generation Note*: Live API chat request failed (${err.message}). Re-routing to offline assistance. Keep your core tight and your chest high!`,
-        },
-      ]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        if (updated.length > 0 && updated[updated.length - 1].content === '') {
+          updated.pop();
+        }
+        return [
+          ...updated,
+          {
+            role: 'assistant',
+            content: `⚠️ *Plan Generation Note*: Live API chat request failed (${err.message}). Re-routing to offline assistance. Keep your core tight and your chest high!`,
+          },
+        ];
+      });
     } finally {
       setSending(false);
     }
