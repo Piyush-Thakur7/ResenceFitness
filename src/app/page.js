@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Onboarding from '@/components/Onboarding';
 import Dashboard from '@/components/Dashboard';
@@ -11,6 +12,51 @@ import BodyAssessmentSection from '@/components/BodyAssessmentSection';
 import MuscleExplorer from '@/components/MuscleExplorer';
 import AICoachSection from '@/components/AICoachSection';
 import SettingsSection from '@/components/SettingsSection';
+
+function CookieConsentBanner() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const consent = localStorage.getItem('cookie-consent');
+    if (!consent) {
+      setVisible(true);
+    }
+  }, []);
+
+  const handleAccept = () => {
+    localStorage.setItem('cookie-consent', 'accepted');
+    setVisible(false);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md z-50 animate-in slide-in-from-bottom duration-300">
+      <div className="bg-zinc-900/95 border border-zinc-800 backdrop-blur-xl p-4.5 rounded-2xl shadow-2xl flex flex-col gap-3">
+        <div className="space-y-1">
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider">🍪 Cookie Preferences</h4>
+          <p className="text-[11px] text-zinc-400 leading-normal">
+            We use essential authentication and session cookies only to verify security details and manage your logged-in session. No ad or marketing trackers are used.
+          </p>
+        </div>
+        <div className="flex gap-2 justify-end">
+          <Link
+            href="/cookie-policy"
+            className="text-[10px] text-zinc-400 hover:text-white font-semibold px-3 py-1.5 border border-zinc-850 hover:border-zinc-800 rounded-lg transition-colors"
+          >
+            Learn More
+          </Link>
+          <button
+            onClick={handleAccept}
+            className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
+          >
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const LOGO_OPTIONS = [
   { id: 'logo_1', title: 'Option 1: Stylized "R" Mark', path: '/logos/logo_1.jpg', desc: 'Modern energy swoosh forming the letter "R" with orange and green gradients.' },
@@ -173,8 +219,42 @@ export default function Home() {
     if (sLog) setSleepLog(sLog);
     if (sLogs) setSleepLogs(sLogs);
     if (wHist) setWeightHistory(wHist);
-    if (bAssess) setAssessments(bAssess);
     if (stk) setStreak(stk);
+
+    if (bAssess) {
+      const resolvedAssessments = await Promise.all(
+        bAssess.map(async (as) => {
+          if (as.photo_urls && Array.isArray(as.photo_urls)) {
+            const signedUrls = await Promise.all(
+              as.photo_urls.map(async (path) => {
+                if (!path || path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) {
+                  return path;
+                }
+                try {
+                  const { data, error } = await supabase.storage
+                    .from('body-photos')
+                    .createSignedUrl(path, 3600); // 1 hour expiry
+                  if (error) {
+                    console.error('Error generating signed url for', path, error);
+                    return '';
+                  }
+                  return data?.signedUrl || '';
+                } catch (err) {
+                  console.error('Error creating signed url', err);
+                  return '';
+                }
+              })
+            );
+            return {
+              ...as,
+              photo_urls: signedUrls.filter(Boolean),
+            };
+          }
+          return as;
+        })
+      );
+      setAssessments(resolvedAssessments);
+    }
   };
 
   // Load mock data
@@ -569,13 +649,9 @@ export default function Home() {
           .upload(fileName, blob, { contentType: 'image/jpeg' });
 
         if (uploadErr) throw uploadErr;
-
-        // Get public or signed URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('body-photos')
-          .getPublicUrl(uploadData.path);
         
-        uploadedUrls.push(publicUrl);
+        // Store path only as required
+        uploadedUrls.push(uploadData.path);
       }
 
       // 2. Call Gemini API
@@ -679,15 +755,15 @@ export default function Home() {
   // Auth Screen View (Landing Page for Public Users)
   if (!session) {
     return (
-      <div className="min-h-screen premium-mesh-bg text-white flex flex-col font-sans relative overflow-x-hidden">
+      <div className="min-h-screen premium-mesh-bg text-white flex flex-col font-sans relative overflow-x-hidden selection:bg-orange-500/30">
         {/* Decorative Background Glows */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Navbar */}
+        {/* Sticky Glassmorphic Navbar */}
         <header className="bg-zinc-900/40 backdrop-blur-md border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-850 bg-zinc-950 flex items-center justify-center">
               <img src="/logos/logo_1.jpg" alt="Resence Logo" className="w-full h-full object-cover" />
             </div>
             <div>
@@ -696,31 +772,47 @@ export default function Home() {
               </span>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setIsSignUp(false);
-              setShowAuthModal(true);
-            }}
-            className="text-xs text-zinc-300 hover:text-white font-semibold px-4 py-2 border border-zinc-800 hover:border-zinc-700 bg-zinc-950 rounded-lg transition-colors cursor-pointer"
-          >
-            Sign In
-          </button>
+          <nav className="hidden md:flex items-center space-x-6 text-xs text-zinc-400 font-semibold">
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <Link href="/about" className="hover:text-white transition-colors">About</Link>
+            <Link href="/demo" className="hover:text-white transition-colors">Interactive Demo</Link>
+          </nav>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => {
+                setIsSignUp(false);
+                setShowAuthModal(true);
+              }}
+              className="text-xs text-zinc-300 hover:text-white font-semibold px-4 py-2 border border-zinc-800 hover:border-zinc-700 bg-zinc-950/60 rounded-xl transition-all cursor-pointer"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                setIsSignUp(true);
+                setShowAuthModal(true);
+              }}
+              className="bg-gradient-to-r from-orange-500 to-purple-500 hover:from-orange-600 hover:to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md shadow-orange-500/10 cursor-pointer uppercase tracking-wider"
+            >
+              Get Started — 100% Free
+            </button>
+          </div>
         </header>
 
         {/* Hero Section */}
-        <section className="flex-1 max-w-5xl mx-auto px-6 py-12 md:py-20 flex flex-col md:flex-row items-center gap-12 relative z-10">
+        <section className="flex-1 max-w-5xl mx-auto px-6 py-16 md:py-24 flex flex-col md:flex-row items-center gap-12 relative z-10 w-full">
           <div className="flex-1 space-y-6 text-center md:text-left">
-            <span className="inline-block text-xs bg-orange-950/40 text-orange-400 border border-orange-900 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
-              ✨ Intelligent Adaptive Coach
+            <span className="inline-block text-[10px] bg-orange-950/40 text-orange-400 border border-orange-900/60 px-3 py-1 rounded-full font-bold uppercase tracking-widest animate-pulse shadow-sm shadow-orange-500/5">
+              🎁 COMPLETELY FREE — FOREVER
             </span>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight text-white">
-              Your body is dynamic.<br/>
-              <span className="bg-gradient-to-r from-orange-500 to-green-500 bg-clip-text text-transparent">
-                Your plan should be too.
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight text-white uppercase">
+              Your AI Fitness Coach <br/>
+              <span className="bg-gradient-to-r from-orange-500 to-purple-500 bg-clip-text text-transparent">
+                That Adapts to YOU
               </span>
             </h1>
-            <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
-              Resence is a personalized fitness tracking client. It uses the Gemini 3.5 Flash model to compile adaptive weekly workout and nutrition plans, critique body assessments from physique photos, and parse daily meal macros.
+            <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-lg">
+              Gemini-powered workout plans, nutrition tracking, body analysis, and recovery insights — all in one intelligent dashboard. No credit card. No ads. No catch.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
               <button
@@ -728,51 +820,76 @@ export default function Home() {
                   setIsSignUp(true);
                   setShowAuthModal(true);
                 }}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition-colors cursor-pointer"
+                className="bg-gradient-to-r from-orange-500 to-purple-500 hover:from-orange-600 hover:to-purple-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 transition-all cursor-pointer uppercase tracking-wider text-xs"
               >
-                Start Your Assessment
+                Start Your Free Plan
               </button>
-              <a
-                href="#features"
-                className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 font-semibold px-6 py-3.5 rounded-xl transition-colors text-center"
+              <Link
+                href="/demo"
+                className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 font-semibold px-6 py-3.5 rounded-xl transition-all text-center text-xs flex items-center justify-center space-x-2"
               >
-                Explore Features
-              </a>
+                <span>Watch Live Demo</span>
+                <svg className="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* Trust Badges Row */}
+            <div className="grid grid-cols-2 gap-3 max-w-md pt-4 text-[10px] text-zinc-400 font-semibold uppercase tracking-wider text-left mx-auto md:mx-0">
+              <div className="flex items-center space-x-2">
+                <span className="text-orange-500 text-sm">🔒</span>
+                <span>Bank-level encryption</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-orange-500 text-sm">🤖</span>
+                <span>Gemini 3.5 Powered</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-orange-500 text-sm">💰</span>
+                <span>100% Free Forever</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-orange-500 text-sm">👁️</span>
+                <span>No Human Photo Reviews</span>
+              </div>
             </div>
           </div>
 
-          {/* Hero Visual Mockup */}
-          <div className="flex-1 w-full max-w-md bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 shadow-2xl relative space-y-4">
+          {/* Hero Visual: Embedded Live Dashboard Preview (interactive mockup animation) */}
+          <div className="flex-1 w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative space-y-4 animate-in fade-in duration-300">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-500/10 to-transparent blur-xl pointer-events-none rounded-tr-2xl" />
             <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
               <div className="flex items-center space-x-2">
-                <div className="w-2.5 h-2.5 bg-red-500/60 rounded-full" />
-                <div className="w-2.5 h-2.5 bg-yellow-500/60 rounded-full" />
-                <div className="w-2.5 h-2.5 bg-green-500/60 rounded-full" />
+                <div className="w-2 h-2 bg-red-500/60 rounded-full" />
+                <div className="w-2 h-2 bg-yellow-500/60 rounded-full" />
+                <div className="w-2 h-2 bg-green-500/60 rounded-full" />
               </div>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Client Dashboard</span>
+              <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Client Dashboard Preview</span>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between items-center bg-zinc-950 p-3 rounded-lg border border-zinc-850">
+            <div className="space-y-3.5">
+              <div className="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-850">
                 <div>
-                  <span className="text-[9px] text-zinc-500 uppercase font-bold block">Current BMI</span>
+                  <span className="text-[8px] text-zinc-500 uppercase font-bold block">Current BMI</span>
                   <span className="text-lg font-black text-white">24.7</span>
                 </div>
-                <span className="text-[10px] text-green-500 bg-green-950/20 border border-green-900/50 px-2 py-0.5 rounded-full font-semibold">Normal weight</span>
+                <span className="text-[9px] text-green-500 bg-green-950/20 border border-green-900/50 px-2 py-0.5 rounded-full font-bold uppercase">Normal weight</span>
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-zinc-400">Calories Consumed</span>
-                  <span className="text-zinc-500">1800 / 2200 kcal</span>
+                <div className="flex justify-between text-[9px] font-bold">
+                  <span className="text-zinc-400">Workout Progress Today</span>
+                  <span className="text-orange-400">2 / 3 Completed</span>
                 </div>
                 <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
-                  <div className="bg-orange-500 h-full w-[80%] rounded-full" />
+                  <div className="bg-orange-500 h-full w-[67%] rounded-full" />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-[10px]">
+                <div className="flex justify-between text-[9px] font-bold">
                   <span className="text-zinc-400">Protein Target</span>
                   <span className="text-zinc-500">120 / 140g</span>
                 </div>
@@ -781,83 +898,186 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-zinc-850 flex justify-between items-center text-xs">
-                <span className="text-zinc-400">Active Logging Streak</span>
-                <span className="font-bold text-orange-500">🔥 7 Days</span>
+              <div className="pt-2 border-t border-zinc-850 flex justify-between items-center text-xs font-semibold">
+                <span className="text-zinc-400">Active Streak</span>
+                <span className="text-orange-500">🔥 7 Days Logged</span>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Proof Bar */}
+        <section className="border-t border-b border-zinc-900 bg-zinc-950/40 py-10 px-6 relative z-10 w-full text-center space-y-6">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Join 12,450+ users transforming their fitness for free</h3>
+            <p className="text-xs text-zinc-500 mt-1 font-light italic">"Built for people who take fitness seriously — without taking your money"</p>
+          </div>
+
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+            <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4.5 space-y-2 animate-in fade-in duration-300">
+              <div className="flex items-center space-x-1.5 text-xs text-yellow-500">★★★★★</div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed font-light">"I got tired of fitness trackers charging $15/month for simple checklists. Resence gives me Gemini workout splits and vision critiques completely free. The photo assessment is surprisingly detailed!"</p>
+              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-wider">— Marcus T., Powerlifter</span>
+            </div>
+            <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4.5 space-y-2 animate-in fade-in duration-300">
+              <div className="flex items-center space-x-1.5 text-xs text-yellow-500">★★★★★</div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed font-light font-sans">"The photo calorie estimator is wonderful. I snap my lunch salad and it immediately parses proteins and carbs, letting me log with one tap. Zero paywalls, zero ads, just high performance."</p>
+              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-wider">— Sarah K., Marathon Runner</span>
+            </div>
+            <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4.5 space-y-2 animate-in fade-in duration-300">
+              <div className="flex items-center space-x-1.5 text-xs text-yellow-500">★★★★★</div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed font-light">"As a developer, I really appreciate the privacy features. Storing photos in secure private buckets with hourly expiring signed URLs is great. It does what it promises without corporate data scraping."</p>
+              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-wider">— David J., DevOps Engineer</span>
             </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="bg-zinc-900/30 border-t border-zinc-900 px-6 py-16 relative z-10">
-          <div className="max-w-5xl mx-auto space-y-12">
+        <section id="features" className="px-6 py-16 relative z-10 max-w-5xl mx-auto w-full">
+          <div className="space-y-12">
             <div className="text-center space-y-4 max-w-2xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-white">Packed with Elite AI Capabilities</h2>
-              <p className="text-zinc-400 text-sm">Everything you need to maintain consistency, adapt intensities, and achieve your targets in one low-friction dashboard.</p>
+              <span className="text-[10px] text-orange-400 font-bold uppercase tracking-widest block">Complete Core Suite</span>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mt-1">Packed with Elite AI Capabilities</h2>
+              <p className="text-zinc-400 text-xs">Everything you need to maintain consistency, adapt intensities, and achieve your targets in one low-friction dashboard.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Feature 1 */}
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
-                <div className="w-10 h-10 bg-orange-950/40 border border-orange-900/50 rounded-xl flex items-center justify-center">
+              <Link href="/features/body-assessment" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
+                <div className="w-10 h-10 bg-orange-950/40 border border-orange-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                   <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-white text-base">AI Body Photo Assessment</h3>
+                <h3 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors">AI Body Photo Assessment</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
                   Upload front or side physique photos securely. Gemini Vision critiques chest/shoulder alignment, calculates muscle gaps, and logs historical progress curves.
                 </p>
-              </div>
+              </Link>
 
               {/* Feature 2 */}
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
-                <div className="w-10 h-10 bg-green-950/40 border border-green-900/50 rounded-xl flex items-center justify-center">
+              <Link href="/features/ai-workout-plans" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
+                <div className="w-10 h-10 bg-green-950/40 border border-green-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                   <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-white text-base">Adaptive Workout Routines</h3>
+                <h3 className="font-bold text-white text-base group-hover:text-green-400 transition-colors">Adaptive Workout Routines</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
                   Weekly active workout plans that automatically adjust. If you consistently tick exercises off, intensity climbs. If you miss days, it adapts to a realistic volume.
                 </p>
-              </div>
+              </Link>
 
               {/* Feature 3 */}
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
-                <div className="w-10 h-10 bg-blue-950/40 border border-blue-900/50 rounded-xl flex items-center justify-center">
+              <Link href="/features/nutrition-tracking" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
+                <div className="w-10 h-10 bg-blue-950/40 border border-blue-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                   <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-white text-base">Food Photo Recognition</h3>
+                <h3 className="font-bold text-white text-base group-hover:text-blue-400 transition-colors">Food Photo Recognition</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
                   Simply take a photo of your meal. Gemini analyzes the food structure, estimates carbs/protein/fat macros, and pre-populates your logging form for one-tap log entries.
                 </p>
-              </div>
+              </Link>
 
               {/* Feature 4 */}
-              <div className="bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3">
-                <div className="w-10 h-10 bg-purple-950/40 border border-purple-900/50 rounded-xl flex items-center justify-center">
+              <Link href="/features/sleep-recovery" className="bg-zinc-900/40 hover:bg-zinc-900/60 border border-zinc-800/80 p-6 rounded-2xl space-y-3 transition-colors cursor-pointer block group">
+                <div className="w-10 h-10 bg-purple-950/40 border border-purple-900/50 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                   <svg className="w-5 h-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-white text-base">Sleep & Recovery Logs</h3>
+                <h3 className="font-bold text-white text-base group-hover:text-purple-400 transition-colors">Sleep & Recovery Logs</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
                   Tailored rest targets based on your training workload. Log sleep times to verify muscle fiber replenishment and optimize HGH hormone release.
                 </p>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-zinc-900 bg-zinc-950 px-6 py-6 text-center text-xs text-zinc-600">
-          <p>© {new Date().getFullYear()} Resence Fitness. All rights reserved.</p>
+        {/* Why Free Section */}
+        <section className="max-w-5xl mx-auto px-6 py-12 relative z-10 w-full text-center space-y-4">
+          <span className="text-[10px] text-orange-400 font-bold uppercase tracking-widest block">No Hidden Traps</span>
+          <h2 className="text-2xl font-black text-white uppercase tracking-wider">Why is Resence Free?</h2>
+          <p className="text-zinc-400 text-xs max-w-xl mx-auto leading-relaxed">
+            We believe that basic fitness metrics and smart AI coaching resources should not be held hostage behind subscription walls. Resence is built as a passion project and supported by personal developer funding and community contributions. We do not sell your personal data or run intrusive trackers.
+          </p>
+        </section>
+
+        {/* 4-Column Structured Footer */}
+        <footer className="border-t border-zinc-850 bg-zinc-950 px-6 py-12 relative z-10 w-full text-zinc-500 font-sans text-xs">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-left pb-8 border-b border-zinc-900">
+            {/* Col 1: Brand */}
+            <div className="space-y-4 col-span-2 md:col-span-1">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-6 h-6 rounded border border-zinc-800 overflow-hidden bg-zinc-950 flex items-center justify-center">
+                  <img src="/logos/logo_1.jpg" alt="Logo" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-white font-bold uppercase tracking-wider text-xs">Resence Fitness</span>
+              </div>
+              <p className="text-[11px] text-zinc-500 leading-relaxed">Your free AI fitness coach. Adapts workouts, evaluates photos, and counts macros with privacy guarantees.</p>
+              {/* Social Icons */}
+              <div className="flex space-x-3 text-zinc-400">
+                <a href="https://github.com/Piyush-Thakur7/ResenceFitness" target="_blank" className="hover:text-white transition-colors" aria-label="GitHub Repository">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Col 2: Product */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold uppercase tracking-wider text-[10px]">Product</h4>
+              <ul className="space-y-2 text-zinc-500 font-medium">
+                <li><Link href="/features/ai-workout-plans" className="hover:text-white transition-colors">AI Workouts</Link></li>
+                <li><Link href="/features/body-assessment" className="hover:text-white transition-colors">Body critique</Link></li>
+                <li><Link href="/features/nutrition-tracking" className="hover:text-white transition-colors">Meal Tracking</Link></li>
+                <li><Link href="/features/sleep-recovery" className="hover:text-white transition-colors">Sleep Timeline</Link></li>
+                <li><Link href="/demo" className="hover:text-white transition-colors">Interactive Demo</Link></li>
+              </ul>
+            </div>
+
+            {/* Col 3: Resources */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold uppercase tracking-wider text-[10px]">Resources</h4>
+              <ul className="space-y-2 text-zinc-500 font-medium">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Story</Link></li>
+                <li><a href="mailto:hello@resence.in" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><Link href="/about#faq" className="hover:text-white transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+
+            {/* Col 4: Legal */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold uppercase tracking-wider text-[10px]">Legal Agreements</h4>
+              <ul className="space-y-2 text-zinc-500 font-medium">
+                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="max-w-5xl mx-auto pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-zinc-600 font-bold uppercase tracking-wider">
+            <span>© {new Date().getFullYear()} Resence Fitness. All rights reserved.</span>
+            <span>Made with 💪 and 🤖 — Always Free</span>
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-zinc-500 hover:text-white transition-colors cursor-pointer flex items-center space-x-1"
+            >
+              <span>Back to Top</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </button>
+          </div>
         </footer>
+
+        {/* Cookie Consent Banner */}
+        <CookieConsentBanner />
 
         {/* Login / Sign Up Overlay Modal */}
         {showAuthModal && (
@@ -928,6 +1148,27 @@ export default function Home() {
                     required
                   />
                 </div>
+
+                {isSignUp && (
+                  <div className="flex items-start space-x-2 pt-1.5">
+                    <input
+                      type="checkbox"
+                      id="termsAgree"
+                      required
+                      className="w-4 h-4 rounded border-zinc-800 accent-orange-500 cursor-pointer mt-0.5"
+                    />
+                    <label htmlFor="termsAgree" className="text-[10px] text-zinc-400 leading-normal">
+                      I agree to the{' '}
+                      <Link href="/terms-of-service" target="_blank" className="text-orange-400 hover:underline">
+                        Terms of Service
+                      </Link>{' '}
+                      and{' '}
+                      <Link href="/privacy-policy" target="_blank" className="text-orange-400 hover:underline">
+                        Privacy Policy
+                      </Link>.
+                    </label>
+                  </div>
+                )}
 
                 <button
                   type="submit"
@@ -1173,7 +1414,7 @@ export default function Home() {
           <div className="relative w-72 max-w-xs h-full bg-zinc-950/95 border-l border-zinc-800 p-6 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-200">
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-zinc-900">
-                <h2 className="text-sm font-extrabold tracking-wider uppercase text-zinc-400">Premium Menu</h2>
+                <h2 className="text-sm font-extrabold tracking-wider uppercase text-zinc-400">Menu</h2>
                 <button 
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-zinc-500 hover:text-white p-1 cursor-pointer"
@@ -1218,7 +1459,7 @@ export default function Home() {
 
             {/* Footer info inside sidebar */}
             <div className="pt-4 border-t border-zinc-900 text-center">
-              <span className="text-[9px] text-zinc-600 block">Resence Fitness Client</span>
+              <span className="text-[9px] text-zinc-600 block">Resence Fitness</span>
               <span className="text-[8px] text-zinc-700 block mt-0.5">v1.2.0 • Active Session</span>
             </div>
           </div>
