@@ -6,93 +6,50 @@ export default function PrivacyPolicy() {
   return (
     <LegalPageLayout title="Privacy Policy" lastUpdated="July 12, 2026">
       <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">1. Data We Collect</h2>
+        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">1. Personal Project Scope</h2>
         <p>
-          Resence Fitness collects and processes user metrics strictly to compute body statistics and adjust exercise splits. 
-          The data elements we collect are:
+          Resence Fitness is a private personal training application built for self-use and a small group of friends. 
+          It is not a commercial service, SaaS product, or registered business entity.
+        </p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">2. Data We Collect</h2>
+        <p>
+          To compile baseline metrics and adjust training schedules, we process:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-          <li><strong>Profile Data</strong>: Age/Date of Birth, gender, current weight, height, and fitness goals.</li>
-          <li><strong>Physique Photos</strong>: Front, side, and back body photos uploaded for AI analysis.</li>
-          <li><strong>Workout Logs</strong>: Exercise names, set reps, and day completion checkboxes.</li>
-          <li><strong>Diet & Nutrition Logs</strong>: Consumed meal descriptions, calories, and protein/carb/fat macros.</li>
-          <li><strong>Sleep & Rest Logs</strong>: Daily bedtime duration and rest timelines.</li>
+          <li><strong>Profile Info</strong>: Age, gender, height, weight, and fitness goals.</li>
+          <li><strong>Physique Photos</strong>: Physique images uploaded for custom AI posture evaluations.</li>
+          <li><strong>Workout & Nutrition Logs</strong>: Exercise tick-offs, sleep logs, and meal macro estimations.</li>
         </ul>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">2. How We Use Artificial Intelligence</h2>
+        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">3. Storage & Security</h2>
         <p>
-          Our application implements generative artificial intelligence models to customize your fitness regimens.
+          All data elements, logs, and photos are stored securely using Supabase databases and storage buckets. 
+          To protect user privacy:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-          <li><strong>Gemini 3.5 Flash Model</strong>: Calibrates workout volume, counts weekly targets, and adjusts caloric intakes.</li>
-          <li><strong>Gemini Vision API</strong>: Critiques posture, fat distribution, and muscle density from physique uploads.</li>
-          <li><strong>Zero Human Review</strong>: All vision reviews are processed programmatically. No human employees, contractors, or administrators ever inspect or critique your physique photos.</li>
+          <li>Physique photos are kept in private buckets with no public URLs. They are accessed using 1-hour expiring signed tokens.</li>
+          <li>No human administrators review or inspect your uploaded photos; they are processed programmatically by the Google Gemini API.</li>
         </ul>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">3. Photo Storage & Military-Grade Security</h2>
+        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">4. Third Party Data Policy</h2>
         <p>
-          We employ state-of-the-art security measures to protect user privacy. All uploaded photos are placed into a locked, non-public Supabase Storage bucket.
-        </p>
-        <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-          <li><strong>Private Buckets</strong>: The storage directories block all direct HTTP request access. Photos do not have static public URLs.</li>
-          <li><strong>Authenticated Signed URLs</strong>: Photos are retrieved exclusively using dynamically-generated signed URLs that expire automatically after one hour (3600 seconds).</li>
-          <li><strong>Encryption at Rest</strong>: All uploaded image files are stored using industry-standard Advanced Encryption Standard (AES-256) encryption-at-rest.</li>
-          <li><strong>30-Day Auto-Deletion</strong>: Image backups are permanently removed from database storage 30 days after creation.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">4. Data Retention Limits</h2>
-        <p>
-          We apply strict data retention policies:
-        </p>
-        <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-          <li><strong>Physique Photos</strong>: Permanently deleted from storage servers after 30 days.</li>
-          <li><strong>Workout, Sleep, and Nutrition Logs</strong>: Retained indefinitely to populate history curves until you choose to delete your account.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">5. Your Privacy Rights (GDPR & CCPA)</h2>
-        <p>
-          Under international privacy regulations (including General Data Protection Regulation and California Consumer Privacy Act), you retain:
-        </p>
-        <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-          <li>The right to request an export of all metrics and logs saved on our servers.</li>
-          <li>The right to delete your profile, purging all associated logs, weight history, and image blocks.</li>
-          <li>To request data deletion or exports, contact our privacy officer at <a href="mailto:privacy@resence.in" className="text-orange-400 hover:underline">privacy@resence.in</a>.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">6. Third Party Integrations</h2>
-        <p>
-          We rely on secure partners to deliver AI features:
-        </p>
-        <ul className="list-disc pl-5 space-y-1 text-zinc-400">
-          <li><strong>Supabase Inc.</strong>: Relational database hosting and private storage buckets.</li>
-          <li><strong>Google Gemini API</strong>: Processes text profiles and base64 image strings. No user data is sent for general model training.</li>
-          <li><strong>No Ad Trackers</strong>: We do not sell, barter, or transfer logs to advertisement brokers or data harvesting agencies.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">7. Cookies</h2>
-        <p>
-          We utilize essential cookies solely for session storage and user authentication (keeping you signed in). 
-          We do not run advertising trackers or third-party cookies on our site.
+          We do not sell, rent, share, or monetize your metrics, log items, or physique photos with any third-party brokers, advertisers, or analytics networks. 
+          Data is sent securely to Google Gemini API endpoints strictly to execute coaching generation and is not used for training general public models.
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">8. Monetization & Passion Project Disclosure</h2>
+        <h2 className="text-white font-bold text-lg border-l-2 border-orange-500 pl-3">5. Data Deletion & Account Deletion</h2>
         <p>
-          Resence is, and will remain, 100% free to use. We do not sell your personal data. 
-          This is a pure passion project developed to build a secure, intelligent, and highly customizable fitness experience.
+          You can delete your account profile at any time inside the Settings section, which permanently purges all profile configurations, logs, history, and uploaded files from our Supabase servers. 
+          For questions, contact the author at <a href="mailto:hello@resence.in" className="text-orange-400 hover:underline">hello@resence.in</a>.
         </p>
       </section>
     </LegalPageLayout>

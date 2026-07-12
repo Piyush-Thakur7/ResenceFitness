@@ -36,7 +36,7 @@ function CookieConsentBanner() {
         <div className="space-y-1">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">🍪 Cookie Preferences</h4>
           <p className="text-[11px] text-zinc-400 leading-normal">
-            We use essential authentication and session cookies only to verify security details and manage your logged-in session. No ad or marketing trackers are used.
+            This app uses session cookies for login only. No tracking, no analytics, no ads.
           </p>
         </div>
         <div className="flex gap-2 justify-end">
@@ -794,141 +794,38 @@ export default function Home() {
               }}
               className="bg-gradient-to-r from-orange-500 to-purple-500 hover:from-orange-600 hover:to-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md shadow-orange-500/10 cursor-pointer uppercase tracking-wider"
             >
-              Get Started — 100% Free
+              Get Started
             </button>
           </div>
         </header>
 
-        {/* Hero Section */}
-        <section className="flex-1 max-w-5xl mx-auto px-6 py-16 md:py-24 flex flex-col md:flex-row items-center gap-12 relative z-10 w-full">
-          <div className="flex-1 space-y-6 text-center md:text-left">
-            <span className="inline-block text-[10px] bg-orange-950/40 text-orange-400 border border-orange-900/60 px-3 py-1 rounded-full font-bold uppercase tracking-widest animate-pulse shadow-sm shadow-orange-500/5">
-              🎁 COMPLETELY FREE — FOREVER
-            </span>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight text-white uppercase">
+        {/* Asymmetric signature background watermark detail */}
+        <div className="hero-distinctive-detail font-display select-none">R</div>
+
+        {/* Redesigned Centered Hero Section */}
+        <section className="flex-1 max-w-4xl mx-auto px-6 pt-32 pb-24 md:pt-44 md:pb-36 flex flex-col items-center justify-center text-center relative z-10 w-full">
+          <div className="space-y-4 max-w-3xl">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-none text-white uppercase font-display">
               Your AI Fitness Coach <br/>
-              <span className="bg-gradient-to-r from-orange-500 to-purple-500 bg-clip-text text-transparent">
+              <span className="text-orange-500">
                 That Adapts to YOU
               </span>
             </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-lg">
-              Gemini-powered workout plans, nutrition tracking, body analysis, and recovery insights — all in one intelligent dashboard. No credit card. No ads. No catch.
+            <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto font-light">
+              Gemini-powered workout plans, nutrition tracking, body analysis, and recovery insights — all in one personal dashboard.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
-              <button
-                onClick={() => {
-                  setIsSignUp(true);
-                  setShowAuthModal(true);
-                }}
-                className="bg-gradient-to-r from-orange-500 to-purple-500 hover:from-orange-600 hover:to-purple-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 transition-all cursor-pointer uppercase tracking-wider text-xs"
-              >
-                Start Your Free Plan
-              </button>
-              <Link
-                href="/demo"
-                className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 font-semibold px-6 py-3.5 rounded-xl transition-all text-center text-xs flex items-center justify-center space-x-2"
-              >
-                <span>Watch Live Demo</span>
-                <svg className="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </Link>
-            </div>
-
-            {/* Trust Badges Row */}
-            <div className="grid grid-cols-2 gap-3 max-w-md pt-4 text-[10px] text-zinc-400 font-semibold uppercase tracking-wider text-left mx-auto md:mx-0">
-              <div className="flex items-center space-x-2">
-                <span className="text-orange-500 text-sm">🔒</span>
-                <span>Bank-level encryption</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-orange-500 text-sm">🤖</span>
-                <span>Gemini 3.5 Powered</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-orange-500 text-sm">💰</span>
-                <span>100% Free Forever</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-orange-500 text-sm">👁️</span>
-                <span>No Human Photo Reviews</span>
-              </div>
-            </div>
           </div>
-
-          {/* Hero Visual: Embedded Live Dashboard Preview (interactive mockup animation) */}
-          <div className="flex-1 w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative space-y-4 animate-in fade-in duration-300">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-orange-500/10 to-transparent blur-xl pointer-events-none rounded-tr-2xl" />
-            <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-red-500/60 rounded-full" />
-                <div className="w-2 h-2 bg-yellow-500/60 rounded-full" />
-                <div className="w-2 h-2 bg-green-500/60 rounded-full" />
-              </div>
-              <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Client Dashboard Preview</span>
-            </div>
-
-            <div className="space-y-3.5">
-              <div className="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-850">
-                <div>
-                  <span className="text-[8px] text-zinc-500 uppercase font-bold block">Current BMI</span>
-                  <span className="text-lg font-black text-white">24.7</span>
-                </div>
-                <span className="text-[9px] text-green-500 bg-green-950/20 border border-green-900/50 px-2 py-0.5 rounded-full font-bold uppercase">Normal weight</span>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between text-[9px] font-bold">
-                  <span className="text-zinc-400">Workout Progress Today</span>
-                  <span className="text-orange-400">2 / 3 Completed</span>
-                </div>
-                <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
-                  <div className="bg-orange-500 h-full w-[67%] rounded-full" />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between text-[9px] font-bold">
-                  <span className="text-zinc-400">Protein Target</span>
-                  <span className="text-zinc-500">120 / 140g</span>
-                </div>
-                <div className="w-full bg-zinc-950 h-2.5 rounded-full overflow-hidden border border-zinc-850">
-                  <div className="bg-green-500 h-full w-[85%] rounded-full" />
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-zinc-850 flex justify-between items-center text-xs font-semibold">
-                <span className="text-zinc-400">Active Streak</span>
-                <span className="text-orange-500">🔥 7 Days Logged</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Social Proof Bar */}
-        <section className="border-t border-b border-zinc-900 bg-zinc-950/40 py-10 px-6 relative z-10 w-full text-center space-y-6">
-          <div>
-            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Join 12,450+ users transforming their fitness for free</h3>
-            <p className="text-xs text-zinc-500 mt-1 font-light italic">"Built for people who take fitness seriously — without taking your money"</p>
-          </div>
-
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-            <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4.5 space-y-2 animate-in fade-in duration-300">
-              <div className="flex items-center space-x-1.5 text-xs text-yellow-500">★★★★★</div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed font-light">"I got tired of fitness trackers charging $15/month for simple checklists. Resence gives me Gemini workout splits and vision critiques completely free. The photo assessment is surprisingly detailed!"</p>
-              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-wider">— Marcus T., Powerlifter</span>
-            </div>
-            <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4.5 space-y-2 animate-in fade-in duration-300">
-              <div className="flex items-center space-x-1.5 text-xs text-yellow-500">★★★★★</div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed font-light font-sans">"The photo calorie estimator is wonderful. I snap my lunch salad and it immediately parses proteins and carbs, letting me log with one tap. Zero paywalls, zero ads, just high performance."</p>
-              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-wider">— Sarah K., Marathon Runner</span>
-            </div>
-            <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl p-4.5 space-y-2 animate-in fade-in duration-300">
-              <div className="flex items-center space-x-1.5 text-xs text-yellow-500">★★★★★</div>
-              <p className="text-[11px] text-zinc-300 leading-relaxed font-light">"As a developer, I really appreciate the privacy features. Storing photos in secure private buckets with hourly expiring signed URLs is great. It does what it promises without corporate data scraping."</p>
-              <span className="text-[9px] text-zinc-500 font-bold block uppercase tracking-wider">— David J., DevOps Engineer</span>
-            </div>
+          
+          <div className="pt-8 w-full max-w-xs sm:max-w-none flex justify-center">
+            <button
+              onClick={() => {
+                setIsSignUp(true);
+                setShowAuthModal(true);
+              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-orange-500/10 hover:shadow-orange-500/20 transition-all cursor-pointer uppercase tracking-wider text-xs"
+            >
+              Get Started
+            </button>
           </div>
         </section>
 
@@ -938,7 +835,7 @@ export default function Home() {
             <div className="text-center space-y-4 max-w-2xl mx-auto">
               <span className="text-[10px] text-orange-400 font-bold uppercase tracking-widest block">Complete Core Suite</span>
               <h2 className="text-2xl md:text-3xl font-extrabold text-white uppercase tracking-wider mt-1">Packed with Elite AI Capabilities</h2>
-              <p className="text-zinc-400 text-xs">Everything you need to maintain consistency, adapt intensities, and achieve your targets in one low-friction dashboard.</p>
+              <p className="text-zinc-400 text-xs">Everything you need to maintain consistency, adapt intensities, and achieve your targets in one personal dashboard.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -998,15 +895,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Why Free Section */}
-        <section className="max-w-5xl mx-auto px-6 py-12 relative z-10 w-full text-center space-y-4">
-          <span className="text-[10px] text-orange-400 font-bold uppercase tracking-widest block">No Hidden Traps</span>
-          <h2 className="text-2xl font-black text-white uppercase tracking-wider">Why is Resence Free?</h2>
-          <p className="text-zinc-400 text-xs max-w-xl mx-auto leading-relaxed">
-            We believe that basic fitness metrics and smart AI coaching resources should not be held hostage behind subscription walls. Resence is built as a passion project and supported by personal developer funding and community contributions. We do not sell your personal data or run intrusive trackers.
-          </p>
-        </section>
-
         {/* 4-Column Structured Footer */}
         <footer className="border-t border-zinc-850 bg-zinc-950 px-6 py-12 relative z-10 w-full text-zinc-500 font-sans text-xs">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-left pb-8 border-b border-zinc-900">
@@ -1018,7 +906,7 @@ export default function Home() {
                 </div>
                 <span className="text-white font-bold uppercase tracking-wider text-xs">Resence Fitness</span>
               </div>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">Your free AI fitness coach. Adapts workouts, evaluates photos, and counts macros with privacy guarantees.</p>
+              <p className="text-[11px] text-zinc-500 leading-relaxed">Your personal AI-powered fitness companion. Built for tracking workouts, nutrition, and recovery.</p>
               {/* Social Icons */}
               <div className="flex space-x-3 text-zinc-400">
                 <a href="https://github.com/Piyush-Thakur7/ResenceFitness" target="_blank" className="hover:text-white transition-colors" aria-label="GitHub Repository">
@@ -1063,7 +951,7 @@ export default function Home() {
           {/* Bottom Bar */}
           <div className="max-w-5xl mx-auto pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-zinc-600 font-bold uppercase tracking-wider">
             <span>© {new Date().getFullYear()} Resence Fitness. All rights reserved.</span>
-            <span>Made with 💪 and 🤖 — Always Free</span>
+            <span>Made with 💪 and 🤖</span>
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="text-zinc-500 hover:text-white transition-colors cursor-pointer flex items-center space-x-1"
