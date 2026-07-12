@@ -678,7 +678,7 @@ export default function Home() {
   // Auth Screen View (Landing Page for Public Users)
   if (!session) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans relative overflow-x-hidden">
+      <div className="min-h-screen premium-mesh-bg text-white flex flex-col font-sans relative overflow-x-hidden">
         {/* Decorative Background Glows */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -860,7 +860,7 @@ export default function Home() {
         {/* Login / Sign Up Overlay Modal */}
         {showAuthModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="max-w-md w-full glowing-login-card rounded-2xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
               <button
                 onClick={() => setShowAuthModal(false)}
                 className="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl font-bold cursor-pointer"
@@ -961,7 +961,7 @@ export default function Home() {
 
   // Full Dashboard Application View
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
+    <div className="min-h-screen premium-mesh-bg text-white flex flex-col">
       {/* Top Banner Alert when in Demo Mode */}
       {demoMode && (
         <div className="bg-orange-500/10 border-b border-orange-950 text-orange-400 py-1.5 px-4 text-[10px] text-center font-medium tracking-wide">
@@ -970,7 +970,7 @@ export default function Home() {
       )}
 
       {/* Navbar Header */}
-      <header className="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-40">
+      <header className="glass-header px-6 py-4 flex items-center justify-between shadow-sm sticky top-0 z-40">
         <div className="flex items-center space-x-3">
           {/* Chosen Logo icon mark */}
           <div className="w-9 h-9 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 flex items-center justify-center">
@@ -996,7 +996,7 @@ export default function Home() {
       {/* Main layout containing Sidebar navigation and tabs content */}
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Sidebar Nav (Desktop only) */}
-        <aside className="hidden md:block w-64 bg-zinc-900/60 border-r border-zinc-800 p-4 space-y-4">
+        <aside className="hidden md:block w-64 glass-sidebar p-4 space-y-4">
           <nav className="flex md:flex-col overflow-x-auto md:overflow-visible gap-2 pb-2 md:pb-0 scrollbar-none">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4z M14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
@@ -1038,8 +1038,9 @@ export default function Home() {
             </div>
           )}
 
-          {activeTab === 'dashboard' && (
-            <Dashboard
+          <div key={activeTab} className="tab-transition">
+            {activeTab === 'dashboard' && (
+              <Dashboard
               profile={profile}
               streak={streak}
               workoutPlan={workoutPlan}
@@ -1113,11 +1114,12 @@ export default function Home() {
               onLogout={handleLogout}
             />
           )}
+          </div>
         </main>
       </div>
 
       {/* Mobile Sticky Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-45 bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800 px-1 py-2.5 flex justify-around items-center">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-45 glass-bottom-nav px-1 py-2.5 flex justify-around items-center">
         {[
           { id: 'dashboard', label: 'Dash', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4z M14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
           { id: 'workout', label: 'Workout', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },

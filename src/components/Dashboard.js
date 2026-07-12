@@ -172,7 +172,7 @@ export default function Dashboard({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Metric Card 1: BMI & Profile Summary */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div className="stripe-card p-5 space-y-4">
           <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
             <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Body Profile</h2>
             <span className="text-xs bg-orange-950/40 text-orange-400 border border-orange-900 px-2 py-0.5 rounded-full font-medium">
@@ -212,7 +212,7 @@ export default function Dashboard({
         </div>
 
         {/* Metric Card 2: Today's Tasks */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div className="stripe-card p-5 space-y-4">
           <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
             <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Today's Workout</h2>
             {workoutCompletion.isRest ? (
@@ -260,7 +260,7 @@ export default function Dashboard({
         </div>
 
         {/* Metric Card 3: Motivation / Streak */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4">
+        <div className="stripe-card p-5 space-y-4">
           <div className="flex justify-between items-center pb-3 border-b border-zinc-800">
             <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider">Consistency</h2>
             <span className="text-xs bg-green-950/40 text-green-400 border border-green-900 px-2 py-0.5 rounded-full font-medium">Streak</span>
@@ -303,7 +303,7 @@ export default function Dashboard({
       </div>
 
       {/* Daily Nutrition Tracker */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm">
+      <div className="stripe-card p-5">
         <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider mb-4">Today's Nutrition Summary</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -375,7 +375,7 @@ export default function Dashboard({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Sleep Quick Summary */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="stripe-card p-5 flex flex-col justify-between space-y-4">
           <div>
             <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider mb-1.5 flex items-center">
               <span className="mr-2">🌙</span> Rest & Recovery
@@ -396,7 +396,7 @@ export default function Dashboard({
         </div>
 
         {/* Water Hydration Tracker */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="stripe-card p-5 flex flex-col justify-between space-y-4">
           <div>
             <div className="flex justify-between items-center mb-1.5">
               <h2 className="text-zinc-300 font-bold text-sm uppercase tracking-wider flex items-center">
