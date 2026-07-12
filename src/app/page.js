@@ -590,11 +590,14 @@ export default function Home() {
     }
 
     try {
-      const { error } = await supabase.from('sleep_logs').upsert({
-        user_id: userId,
-        date: todayStr,
-        ...sleepData,
-      });
+      const { error } = await supabase.from('sleep_logs').upsert(
+        {
+          user_id: userId,
+          date: todayStr,
+          ...sleepData,
+        },
+        { onConflict: 'user_id,date' }
+      );
       if (error) throw error;
       await refreshUserData(userId);
     } catch (err) {

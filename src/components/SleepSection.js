@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SleepSection({
   profile,
@@ -8,7 +8,17 @@ export default function SleepSection({
   sleepLogs = [],
   onLogSleep,
 }) {
-  const [hours, setHours] = useState(sleepLog?.actual_hours || 7.5);
+  const [hours, setHours] = useState(7.5);
+  const [saving, setSaving] = useState(false);
+
+  // Sync state dynamically when sleepLog updates
+  useEffect(() => {
+    if (sleepLog?.actual_hours) {
+      setHours(Number(sleepLog.actual_hours));
+    } else {
+      setHours(7.5);
+    }
+  }, [sleepLog]);
 
   // Recommended sleep based on fitness goals
   const recommendedHours = sleepLog?.recommended_hours || (() => {
@@ -26,20 +36,34 @@ export default function SleepSection({
     }
   })();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogSleep({
-      recommended_hours: recommendedHours,
-      actual_hours: parseFloat(hours),
-    });
+    setSaving(true);
+    try {
+      await onLogSleep({
+        recommended_hours: recommendedHours,
+        actual_hours: parseFloat(hours),
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Sleep & Recovery Logs</h1>
-        <p className="text-zinc-400 text-sm">Sleep is crucial for muscle repair, fat oxidation, and metabolic balance.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+            <span>Sleep & Recovery Logs</span>
+            {sleepLog && (
+              <span className="text-[10px] bg-green-500/10 text-green-400 border border-green-950 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                ✓ Logged Today
+              </span>
+            )}
+          </h1>
+          <p className="text-zinc-400 text-sm">Sleep is crucial for muscle repair, fat oxidation, and metabolic balance.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -72,9 +96,10 @@ export default function SleepSection({
             <div className="pt-2">
               <button
                 type="submit"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
+                disabled={saving}
+                className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors cursor-pointer"
               >
-                Log Sleep Duration
+                {saving ? 'Logging...' : (sleepLog ? 'Update Sleep Log' : 'Log Sleep Duration')}
               </button>
             </div>
           </form>
