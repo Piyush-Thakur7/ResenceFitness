@@ -1179,6 +1179,13 @@ export default function DietSection({
                       <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">{scannedItems.length} items logged</span>
                     </div>
 
+                    {scannedHidden.some(h => h.checked) && (
+                      <div className="bg-orange-500/10 border border-orange-500/20 p-2.5 rounded-lg text-[9.5px] text-orange-450 font-bold uppercase tracking-wider flex items-center justify-between animate-in slide-in-from-top-1 duration-200">
+                        <span>⚡ Adjusted for: {scannedHidden.filter(h => h.checked).map(h => h.name).join(', ')}</span>
+                        <span className="text-[8px] bg-orange-950/40 px-1.5 py-0.5 rounded text-orange-300 border border-orange-900/50">Active</span>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                       <div>
                         <span className="text-[9px] text-zinc-500 uppercase font-bold block mb-0.5">Calories</span>

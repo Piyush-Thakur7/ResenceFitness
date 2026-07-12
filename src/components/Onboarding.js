@@ -78,6 +78,8 @@ export default function Onboarding({ user, onComplete }) {
   const [gender, setGender] = useState('male');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
+  const [heightError, setHeightError] = useState('');
+  const [weightError, setWeightError] = useState('');
   const [diet, setDiet] = useState('Non-Veg');
   const [goal, setGoal] = useState('General Fitness');
   const [injuries, setInjuries] = useState('');
@@ -98,10 +100,50 @@ export default function Onboarding({ user, onComplete }) {
     return age;
   };
 
-  const handleNext = () => {
-    if (step === 1 && (!dob || !height || !weight)) {
-      setError('Please fill in date of birth, height, and weight to continue.');
+  const handleHeightChange = (val) => {
+    setHeight(val);
+    if (!val) {
+      setHeightError('Height is required.');
       return;
+    }
+    const num = parseFloat(val);
+    if (isNaN(num) || num < 100 || num > 250) {
+      setHeightError('Height must be between 100 and 250 cm.');
+    } else {
+      setHeightError('');
+    }
+  };
+
+  const handleWeightChange = (val) => {
+    setWeight(val);
+    if (!val) {
+      setWeightError('Weight is required.');
+      return;
+    }
+    const num = parseFloat(val);
+    if (isNaN(num) || num < 30 || num > 300) {
+      setWeightError('Weight must be between 30 and 300 kg.');
+    } else {
+      setWeightError('');
+    }
+  };
+
+  const handleNext = () => {
+    if (step === 1) {
+      if (!dob || !height || !weight) {
+        setError('Please fill in date of birth, height, and weight to continue.');
+        return;
+      }
+      const hNum = parseFloat(height);
+      const wNum = parseFloat(weight);
+      if (isNaN(hNum) || hNum < 100 || hNum > 250) {
+        setError('Height must be between 100 and 250 cm.');
+        return;
+      }
+      if (isNaN(wNum) || wNum < 30 || wNum > 300) {
+        setError('Weight must be between 30 and 300 kg.');
+        return;
+      }
     }
     setError('');
     setStep(step + 1);
@@ -121,8 +163,11 @@ export default function Onboarding({ user, onComplete }) {
       const parsedHeight = parseFloat(height);
       const parsedWeight = parseFloat(weight);
 
-      if (isNaN(parsedHeight) || isNaN(parsedWeight)) {
-        throw new Error('Height and weight must be valid numbers.');
+      if (isNaN(parsedHeight) || parsedHeight < 100 || parsedHeight > 250) {
+        throw new Error('Height must be between 100 and 250 cm.');
+      }
+      if (isNaN(parsedWeight) || parsedWeight < 30 || parsedWeight > 300) {
+        throw new Error('Weight must be between 30 and 300 kg.');
       }
 
       await onComplete({
@@ -224,10 +269,13 @@ export default function Onboarding({ user, onComplete }) {
                     type="number"
                     placeholder="e.g. 175"
                     value={height}
-                    onChange={(e) => setHeight(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500"
+                    onChange={(e) => handleHeightChange(e.target.value)}
+                    className={`w-full bg-zinc-950 border rounded-lg px-4 py-2.5 text-white focus:outline-none ${heightError ? 'border-red-500 focus:border-red-500' : 'border-zinc-800 focus:border-orange-500'}`}
                     required
                   />
+                  {heightError && (
+                    <span className="text-red-400 text-[10px] mt-1.5 block font-semibold">{heightError}</span>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-2">Weight (kg)</label>
@@ -235,10 +283,13 @@ export default function Onboarding({ user, onComplete }) {
                     type="number"
                     placeholder="e.g. 70"
                     value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500"
+                    onChange={(e) => handleWeightChange(e.target.value)}
+                    className={`w-full bg-zinc-950 border rounded-lg px-4 py-2.5 text-white focus:outline-none ${weightError ? 'border-red-500 focus:border-red-500' : 'border-zinc-800 focus:border-orange-500'}`}
                     required
                   />
+                  {weightError && (
+                    <span className="text-red-400 text-[10px] mt-1.5 block font-semibold">{weightError}</span>
+                  )}
                 </div>
               </div>
             </div>

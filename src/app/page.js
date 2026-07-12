@@ -297,7 +297,9 @@ export default function Home() {
           },
         });
         if (error) throw error;
-        alert('Verification email sent! Check your inbox or log in if auto-confirmed.');
+        setLoading(false);
+        setShowAuthModal(false);
+        alert('Verification email sent! Please check your inbox to activate your account.');
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: authEmail,
@@ -306,7 +308,16 @@ export default function Home() {
         if (error) throw error;
       }
     } catch (err) {
-      setAuthError(err.message || 'Authentication failed');
+      console.error('Authentication error:', err);
+      let friendlyMsg = err.message || 'Authentication failed';
+      if (
+        friendlyMsg.toLowerCase().includes('rate limit') || 
+        friendlyMsg.toLowerCase().includes('60 seconds') || 
+        err.status === 429
+      ) {
+        friendlyMsg = 'Please wait 60 seconds before requesting another verification email.';
+      }
+      setAuthError(friendlyMsg);
       setLoading(false);
     }
   };

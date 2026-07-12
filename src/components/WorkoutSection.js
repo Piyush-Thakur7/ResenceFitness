@@ -182,6 +182,7 @@ export default function WorkoutSection({
   loading = false,
 }) {
   const [activeDay, setActiveDay] = useState('monday');
+  const [updatingExercises, setUpdatingExercises] = useState({});
 
   // Set active tab on mount to prevent hydration timezone mismatch
   useEffect(() => {
@@ -193,6 +194,18 @@ export default function WorkoutSection({
 
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [modalTab, setModalTab] = useState('demo'); // 'demo' or 'wiki'
+
+  const handleCheckboxClick = async (exerciseName, isDone) => {
+    if (updatingExercises[exerciseName]) return;
+    setUpdatingExercises(prev => ({ ...prev, [exerciseName]: true }));
+    try {
+      await onToggleExercise(exerciseName, isDone);
+    } catch (err) {
+      console.error('Failed to toggle exercise:', err);
+    } finally {
+      setUpdatingExercises(prev => ({ ...prev, [exerciseName]: false }));
+    }
+  };
 
   const currentDayPlan = workoutPlan?.plan_data?.days?.[activeDay] || workoutPlan?.plan_data?.[activeDay] || null;
 
@@ -393,15 +406,20 @@ export default function WorkoutSection({
                         >
                           <div className="flex items-start space-x-3.5 flex-1 pr-4">
                             <button
-                              onClick={() => onToggleExercise(ex.name, !done)}
-                              disabled={!activeDayIsToday()}
+                              onClick={() => handleCheckboxClick(ex.name, !done)}
+                              disabled={!activeDayIsToday() || updatingExercises[ex.name]}
                               className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center transition-colors cursor-pointer border ${done ? 'bg-green-500 border-green-500 text-white' : 'border-zinc-800 bg-zinc-900 hover:border-orange-500'} disabled:opacity-50`}
                             >
-                              {done && (
+                              {updatingExercises[ex.name] ? (
+                                <svg className="w-3 h-3 animate-spin text-zinc-400" viewBox="0 0 24 24" fill="none">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                              ) : done ? (
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
-                              )}
+                              ) : null}
                             </button>
                             
                             <div>
