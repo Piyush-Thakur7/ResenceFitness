@@ -28,11 +28,13 @@ How can I help you optimize your training, recovery, or diet structure today? Re
   ]);
   const [inputValue, setInputValue] = useState('');
   const [sending, setSending] = useState(false);
-  const chatEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
-  // Auto scroll to latest message
+  // Auto scroll to latest message inside the container to avoid page shifts
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages, sending]);
 
   const handleSend = async (text) => {
@@ -111,7 +113,10 @@ How can I help you optimize your training, recovery, or diet structure today? Re
       {/* Main Chat Panel Container */}
       <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col overflow-hidden relative shadow-sm">
         {/* Messages List Area */}
-        <div className="flex-1 p-5 overflow-y-auto space-y-4 text-sm leading-relaxed scrollbar-thin">
+        <div 
+          ref={chatContainerRef}
+          className="flex-1 p-5 overflow-y-auto space-y-4 text-sm leading-relaxed scrollbar-thin"
+        >
           {messages.map((msg, idx) => {
             const isUser = msg.role === 'user';
             return (
@@ -150,22 +155,21 @@ How can I help you optimize your training, recovery, or diet structure today? Re
               </div>
             </div>
           )}
-          <div ref={chatEndRef} />
         </div>
 
         {/* Suggested Prompt Chips */}
         {messages.length === 1 && (
-          <div className="px-5 pb-2">
+          <div className="px-5 pb-3">
             <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider block mb-2">Suggested topics</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="flex flex-row overflow-x-auto gap-2 pb-1.5 scrollbar-none no-wrap">
               {SUGGESTED_PROMPTS.map((prompt, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleChipClick(prompt.text)}
-                  className="bg-zinc-950 hover:bg-zinc-850 border border-zinc-850 text-zinc-400 hover:text-white px-3 py-2 rounded-xl text-left text-[11px] flex items-center space-x-2.5 transition-colors cursor-pointer"
+                  className="bg-zinc-950 hover:bg-zinc-850 border border-zinc-850 text-zinc-400 hover:text-white px-3 py-2 rounded-xl text-left text-[11px] flex items-center space-x-2 flex-shrink-0 cursor-pointer transition-colors"
                 >
-                  <span className="text-sm">{prompt.icon}</span>
-                  <span className="truncate">{prompt.text}</span>
+                  <span className="text-xs">{prompt.icon}</span>
+                  <span className="whitespace-nowrap">{prompt.text}</span>
                 </button>
               ))}
             </div>
@@ -183,7 +187,7 @@ How can I help you optimize your training, recovery, or diet structure today? Re
           >
             <input
               type="text"
-              placeholder="Ask about workouts, diet, or posture adjustments..."
+              placeholder="Ask about workouts, diet, or posture..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
