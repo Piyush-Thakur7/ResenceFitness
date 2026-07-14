@@ -20,41 +20,54 @@ function getModel(customModelName) {
 
 /**
  * Executes a Gemini request with retry logic (exponential backoff)
- * and falls back to a secondary model if primary model is exhausted.
+ * and falls back across a chain of models if errors occur.
  */
 async function executeWithRetryAndFallback(callFn) {
-  for (let attempt = 0; attempt < GEMINI_MAX_RETRIES; attempt++) {
-    try {
-      return await callFn(PRIMARY_GEMINI_MODEL);
-    } catch (err) {
-      const errStr = err.message || '';
-      const is503 = err.status === 503 || 
-                    errStr.includes('503') || 
-                    errStr.includes('Service Unavailable') || 
-                    errStr.includes('resource exhausted') ||
-                    errStr.includes('RESOURCE_EXHAUSTED') ||
-                    errStr.includes('overloaded') ||
-                    errStr.includes('high demand');
-      
-      if (!is503) {
-        throw err;
-      }
+  const modelsToTry = [
+    PRIMARY_GEMINI_MODEL,
+    FALLBACK_GEMINI_MODEL,
+    'gemini-1.5-flash',
+    'gemini-2.0-flash'
+  ];
+  
+  // Filter out duplicates and falsy values to keep fallback path distinct
+  const uniqueModels = Array.from(new Set(modelsToTry.filter(Boolean)));
+  let lastError = null;
 
-      console.warn(`Gemini 503 error on ${PRIMARY_GEMINI_MODEL} (attempt ${attempt + 1}/${GEMINI_MAX_RETRIES}). Retrying...`);
-      if (attempt < GEMINI_MAX_RETRIES - 1) {
-        await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAYS[attempt]));
+  for (const modelName of uniqueModels) {
+    for (let attempt = 0; attempt < GEMINI_MAX_RETRIES; attempt++) {
+      try {
+        return await callFn(modelName);
+      } catch (err) {
+        lastError = err;
+        const errStr = err.message || '';
+        const isTransient = err.status === 503 || 
+                            err.status === 429 ||
+                            errStr.includes('503') || 
+                            errStr.includes('429') ||
+                            errStr.includes('Service Unavailable') || 
+                            errStr.includes('resource exhausted') ||
+                            errStr.includes('RESOURCE_EXHAUSTED') ||
+                            errStr.includes('overloaded') ||
+                            errStr.includes('high demand') ||
+                            errStr.includes('Rate limit');
+        
+        // If it's a non-transient error (e.g. Model Not Found 404), skip retrying this model
+        if (!isTransient) {
+          console.warn(`Non-transient error on model ${modelName}: ${errStr}. Cascading to next model.`);
+          break;
+        }
+
+        console.warn(`Transient Gemini error on model ${modelName} (attempt ${attempt + 1}/${GEMINI_MAX_RETRIES}). Retrying...`);
+        if (attempt < GEMINI_MAX_RETRIES - 1) {
+          await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAYS[attempt]));
+        }
       }
     }
   }
 
-  // Backup model fallback
-  console.warn(`Primary model ${PRIMARY_GEMINI_MODEL} failed. Falling back to backup model ${FALLBACK_GEMINI_MODEL}...`);
-  try {
-    return await callFn(FALLBACK_GEMINI_MODEL);
-  } catch (err) {
-    console.error(`Fallback model ${FALLBACK_GEMINI_MODEL} also failed:`, err);
-    throw new Error('Having trouble reaching the AI right now, please try again in a moment');
-  }
+  console.error("All fallback models in cascade failed. Final exception:", lastError);
+  throw new Error('Having trouble reaching the AI right now, please try again in a moment');
 }
 
 function parseJsonSafe(responseText) {
