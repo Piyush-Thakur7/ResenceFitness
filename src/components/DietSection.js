@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
@@ -41,6 +42,7 @@ export default function DietSection({
   const [scannedHidden, setScannedHidden] = useState([]);
   const [frequentFoods, setFrequentFoods] = useState([]);
   const [editingItemIdx, setEditingItemIdx] = useState(null);
+  const [mealSource, setMealSource] = useState('manual');
   
   // Pipeline progress states (2026 standards)
   // 'idle' | 'compress' | 'upload' | 'analyze' | 'done' | 'failed'
@@ -54,9 +56,20 @@ export default function DietSection({
 
   // Voice & Text Input fallbacks
   const [voiceInput, setVoiceInput] = useState('');
-  const [isListening, setIsListening] = useState(false);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [showBarcode, setShowBarcode] = useState(false);
+
+  const {
+    isRecording,
+    isTranscribing,
+    error: voiceError,
+    startRecording,
+    stopRecording,
+  } = useVoiceRecorder((transcript) => {
+    setVoiceInput(transcript);
+    setMealSource('voice');
+    runTextAnalysis(transcript);
+  });
 
   // Load cached frequent foods on mount
   useEffect(() => {
@@ -150,6 +163,7 @@ export default function DietSection({
       fiber: parseFloat(fiber || 0),
       sodium: parseFloat(sodium || 0),
       sugar: parseFloat(sugar || 0),
+      source: 'manual',
     });
 
     onLogMeal({
@@ -203,6 +217,7 @@ export default function DietSection({
       fiber: totalFiber,
       sodium: totalSodium,
       sugar: totalSugar,
+      source: mealSource,
     });
 
     onLogMeal({
@@ -225,11 +240,24 @@ export default function DietSection({
     setScannedHidden([]);
     setPhotoPreview(null);
     setPipelineStep('idle');
+    setVoiceInput('');
+    setMealSource('manual');
+  };
+
+  const handleDiscardScannedMeal = () => {
+    // Clear Scanner State
+    setScannedItems([]);
+    setScannedHidden([]);
+    setPhotoPreview(null);
+    setPipelineStep('idle');
+    setVoiceInput('');
+    setMealSource('manual');
   };
 
   // 1. Preprocess & compress step
   const startProcessingPipeline = async (file) => {
     if (!file) return;
+    setMealSource('photo');
     setCurrentFile(file);
     setPipelineError(null);
     setPhotoPreview(URL.createObjectURL(file));
@@ -492,46 +520,12 @@ export default function DietSection({
     }
   };
 
-  // Web Speech API Voice listener
-  const handleVoiceListen = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Speech recognition is not supported in this browser. Please type description instead.');
-      return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onerror = (e) => {
-      console.error(e);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setVoiceInput(transcript);
-      runTextAnalysis(transcript);
-    };
-
-    recognition.start();
-  };
-
   // Barcode packaged food mock log
   const handleBarcodeSubmit = (e) => {
     e.preventDefault();
     if (!barcodeInput.trim()) return;
 
+    setMealSource('barcode');
     setUploading(true);
     setPipelineStep('analyze');
     setTimeout(() => {
@@ -568,6 +562,7 @@ export default function DietSection({
   // Apply Generic Portion Template (Fallback 3)
   const handleSelectTemplate = (tpl) => {
     setMealName(tpl.name);
+    setMealSource('template');
     setScannedItems([
       {
         name: tpl.name,
@@ -869,17 +864,21 @@ export default function DietSection({
                 {/* Voice Logger Trigger */}
                 <button
                   type="button"
-                  onClick={handleVoiceListen}
-                  disabled={uploading}
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={uploading || isTranscribing}
                   className={`flex flex-col items-center justify-center border border-zinc-800 hover:border-orange-500 rounded-xl py-5 transition-colors text-center cursor-pointer ${
-                    isListening ? 'bg-orange-500/5 border-orange-500/40 text-orange-400' : 'bg-zinc-950'
+                    isRecording ? 'bg-red-500/10 border-red-500/40 text-red-450' : (isTranscribing ? 'bg-orange-500/5 border-orange-500/40 text-orange-400 animate-pulse' : 'bg-zinc-950')
                   }`}
                 >
-                  <svg className={`w-6 h-6 mb-1 ${isListening ? 'text-orange-500 animate-pulse' : 'text-zinc-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  <svg className={`w-6 h-6 mb-1 ${isRecording ? 'text-red-500 animate-pulse' : (isTranscribing ? 'text-orange-550' : 'text-zinc-500')}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {isTranscribing ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" className="animate-spin origin-center" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    )}
                   </svg>
                   <span className="text-[9px] text-zinc-550 font-bold uppercase tracking-wider">
-                    {isListening ? 'Listening...' : 'Voice Logger'}
+                    {isRecording ? 'Stop Recording' : (isTranscribing ? 'Transcribing...' : 'Voice Logger')}
                   </span>
                 </button>
 
@@ -915,6 +914,12 @@ export default function DietSection({
                     Scan
                   </button>
                 </form>
+              )}
+
+              {voiceError && (
+                <div className="p-3 bg-red-950/10 border border-red-950 rounded-xl text-center text-[10px] text-red-300 font-semibold leading-relaxed">
+                  ⚠️ {voiceError}
+                </div>
               )}
 
               {/* 2026 Step Progress indicators (Compress -> Upload -> Analyze -> Done) */}
@@ -1211,12 +1216,20 @@ export default function DietSection({
                       <span>Sugar: {scannedTotals.sugar}g</span>
                     </div>
 
-                    <button
-                      onClick={handleSaveScannedMeal}
-                      className="bg-orange-500 hover:bg-orange-600 text-black text-[10px] font-black py-3 rounded-xl transition-colors w-full cursor-pointer uppercase tracking-wider"
-                    >
-                      Confirm and Log Meal
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <button
+                        onClick={handleDiscardScannedMeal}
+                        className="bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 text-zinc-300 text-[10px] font-bold py-3 px-4 rounded-xl transition-colors flex-1 cursor-pointer uppercase tracking-wider text-center"
+                      >
+                        Discard / Try Again
+                      </button>
+                      <button
+                        onClick={handleSaveScannedMeal}
+                        className="bg-orange-500 hover:bg-orange-605 text-black text-[10px] font-black py-3 px-4 rounded-xl transition-colors flex-1 cursor-pointer uppercase tracking-wider text-center"
+                      >
+                        Add to Today's Log
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

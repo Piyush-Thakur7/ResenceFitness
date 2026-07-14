@@ -474,3 +474,33 @@ export async function chatWithCoachStream(profile, messages) {
     }
   });
 }
+
+/**
+ * Transcribes audio clip to plain text using Gemini API
+ */
+export async function transcribeAudio(base64Audio, mimeType = 'audio/webm') {
+  const model = getModel();
+
+  const audioPart = {
+    inlineData: {
+      data: base64Audio,
+      mimeType
+    },
+  };
+
+  const prompt = `
+    You are an accurate audio transcription assistant. 
+    Transcribe the spoken words in the attached audio clip as plain text. 
+    Provide ONLY the plain text transcription. Do NOT wrap it in JSON, markdown code blocks, or include any preamble, metadata, or side explanations.
+    If the audio contains a meal description, transcribe it word for word.
+    If the audio contains a question or message, transcribe it word for word.
+    If the audio is silent or unintelligible, return an empty string or "Unintelligible audio".
+  `;
+
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }, audioPart] }],
+  });
+
+  return result.response.text().trim();
+}
+

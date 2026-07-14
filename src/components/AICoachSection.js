@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
 
 const SUGGESTED_PROMPTS = [
   { text: 'Lower back is sore, what variations should I do?', icon: '🩹' },
@@ -29,6 +30,16 @@ How can I help you optimize your training, recovery, or diet structure today? Re
   const [inputValue, setInputValue] = useState('');
   const [sending, setSending] = useState(false);
   const chatContainerRef = useRef(null);
+
+  const {
+    isRecording,
+    isTranscribing,
+    error: voiceError,
+    startRecording,
+    stopRecording,
+  } = useVoiceRecorder((transcript) => {
+    handleSend(transcript);
+  });
 
   // Auto scroll to latest message inside the container to avoid page shifts
   useEffect(() => {
@@ -209,6 +220,12 @@ How can I help you optimize your training, recovery, or diet structure today? Re
           </div>
         )}
 
+        {voiceError && (
+          <div className="mx-4 p-2.5 bg-red-950/20 border border-red-900/50 text-red-400 text-[10px] rounded-xl text-center font-semibold leading-relaxed animate-in fade-in duration-200">
+            ⚠️ {voiceError}
+          </div>
+        )}
+
         {/* Input Bar */}
         <div className="p-4 bg-zinc-950/60 border-t border-zinc-850">
           <form
@@ -216,20 +233,41 @@ How can I help you optimize your training, recovery, or diet structure today? Re
               e.preventDefault();
               handleSend(inputValue);
             }}
-            className="flex items-center space-x-3"
+            className="flex items-center space-x-2.5"
           >
             <input
               type="text"
-              placeholder="Ask about workouts, diet, or posture..."
+              placeholder={isRecording ? "Listening to your voice..." : "Ask about workouts, diet, or posture..."}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
-              disabled={sending}
-              required
+              disabled={sending || isRecording || isTranscribing}
+              required={!isRecording}
             />
+            
+            <button
+              type="button"
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={sending || isTranscribing}
+              className={`p-3.5 rounded-xl border transition-colors cursor-pointer flex items-center justify-center ${
+                isRecording 
+                  ? 'bg-red-500/10 border-red-500/40 text-red-400' 
+                  : (isTranscribing ? 'bg-orange-500/5 border-orange-500/40 text-orange-450 animate-pulse' : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700 text-zinc-400')
+              }`}
+              title={isRecording ? 'Stop Recording' : 'Record voice query'}
+            >
+              <svg className={`w-4 h-4 ${isRecording ? 'text-red-500 animate-pulse' : (isTranscribing ? 'text-orange-550' : 'text-zinc-450')}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {isTranscribing ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" className="animate-spin origin-center" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                )}
+              </svg>
+            </button>
+
             <button
               type="submit"
-              disabled={sending || !inputValue.trim()}
+              disabled={sending || isRecording || isTranscribing || !inputValue.trim()}
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-3 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-40"
             >
               Send

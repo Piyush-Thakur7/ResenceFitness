@@ -153,7 +153,7 @@ function AnimatedMiniPlayer({ muscle }) {
 
 export default function MuscleExplorer({ profile }) {
   const [selectedMuscle, setSelectedMuscle] = useState('chest');
-  const [activeExercise, setActiveExercise] = useState(null);
+  const [activeExercise, setActiveExercise] = useState(EXPLORER_EXERCISES.chest[0]);
 
   const getWikiLink = (exName) => {
     const category = selectedMuscle === 'chest' || selectedMuscle === 'shoulders' ? 'dumbbells' : 'bodyweight';
@@ -177,7 +177,7 @@ export default function MuscleExplorer({ profile }) {
               key={m.id}
               onClick={() => {
                 setSelectedMuscle(m.id);
-                setActiveExercise(null);
+                setActiveExercise(EXPLORER_EXERCISES[m.id][0]);
               }}
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-all capitalize whitespace-nowrap cursor-pointer ${active ? 'border-orange-500 text-orange-500' : 'border-transparent text-zinc-400 hover:text-zinc-200'}`}
             >
@@ -200,12 +200,19 @@ export default function MuscleExplorer({ profile }) {
             {EXPLORER_EXERCISES[selectedMuscle].map((ex) => {
               const active = activeExercise?.name === ex.name;
               return (
-                <button
+                <div
                   key={ex.name}
-                  type="button"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     console.log('Selecting active exercise:', ex.name);
                     setActiveExercise(ex);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveExercise(ex);
+                    }
                   }}
                   className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all cursor-pointer block ${
                     active 
@@ -215,7 +222,7 @@ export default function MuscleExplorer({ profile }) {
                 >
                   <span className="block">{ex.name}</span>
                   <span className="text-[10px] text-zinc-500 font-medium block mt-0.5">Equip: {ex.equipment} | Target: {ex.target}</span>
-                </button>
+                </div>
               );
             })}
           </div>
