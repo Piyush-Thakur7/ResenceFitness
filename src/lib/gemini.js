@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY;
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash';
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 // Retry configuration constants
@@ -21,7 +21,7 @@ function getModel(customModelName) {
  * on the configured model without falling back to other model names.
  */
 async function executeWithRetryAndFallback(callFn) {
-  const modelToUse = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash';
+  const modelToUse = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
 
   for (let attempt = 0; attempt < GEMINI_MAX_RETRIES; attempt++) {
     try {
