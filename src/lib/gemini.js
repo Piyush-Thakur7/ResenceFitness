@@ -5,12 +5,56 @@ const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
 
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
-// Helper to check if Gemini is configured
-function getModel() {
+// Helper to check if Gemini is configured, accepts custom model override
+function getModel(customModelName) {
   if (!genAI) {
     throw new Error('Gemini API Key is not configured. Please add GEMINI_API_KEY to your .env.local file.');
   }
-  return genAI.getGenerativeModel({ model: modelName });
+  return genAI.getGenerativeModel({ model: customModelName || modelName });
+}
+
+/**
+ * Executes a Gemini request with retry logic (exponential backoff)
+ * and falls back to gemini-2.5-flash if gemini-3.5-flash fails.
+ */
+async function executeWithRetryAndFallback(callFn) {
+  const maxRetries = 3;
+  const delays = [1000, 2000, 4000];
+  const primary = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
+  const fallback = primary === 'gemini-3.5-flash' ? 'gemini-2.5-flash' : 'gemini-1.5-flash';
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await callFn(primary);
+    } catch (err) {
+      const errStr = err.message || '';
+      const is503 = err.status === 503 || 
+                    errStr.includes('503') || 
+                    errStr.includes('Service Unavailable') || 
+                    errStr.includes('resource exhausted') ||
+                    errStr.includes('RESOURCE_EXHAUSTED') ||
+                    errStr.includes('overloaded') ||
+                    errStr.includes('high demand');
+      
+      if (!is503) {
+        throw err;
+      }
+
+      console.warn(`Gemini 503 error on ${primary} (attempt ${attempt + 1}/${maxRetries}). Retrying...`);
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+      }
+    }
+  }
+
+  // Backup model fallback
+  console.warn(`Primary model ${primary} failed. Falling back to backup model ${fallback}...`);
+  try {
+    return await callFn(fallback);
+  } catch (err) {
+    console.error(`Fallback model ${fallback} also failed:`, err);
+    throw new Error('Having trouble reaching the AI right now, please try again in a moment');
+  }
 }
 
 function parseJsonSafe(responseText) {
@@ -30,8 +74,6 @@ function parseJsonSafe(responseText) {
  * Generates an adaptive weekly workout plan
  */
 export async function generateWorkoutPlan(profile, assessmentReport = '') {
-  const model = getModel();
-
   const prompt = `
     You are a professional fitness coach. Generate a personalized weekly workout plan (Monday to Sunday) for a user with the following details:
     - Age: ${calculateAge(profile.dob)} years
@@ -90,22 +132,22 @@ export async function generateWorkoutPlan(profile, assessmentReport = '') {
     }
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+    return JSON.parse(result.response.text());
   });
-
-  return JSON.parse(result.response.text());
 }
 
 /**
  * Generates an adaptive diet plan
  */
 export async function generateDietPlan(profile) {
-  const model = getModel();
-
   const prompt = `
     You are an expert nutritionist. Generate a personalized weekly diet plan for a user with the following details:
     - Weight: ${profile.weight} kg
@@ -142,22 +184,22 @@ export async function generateDietPlan(profile) {
     }
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+    return JSON.parse(result.response.text());
   });
-
-  return JSON.parse(result.response.text());
 }
 
 /**
  * Recognizes food photo and estimates nutrition
  */
 export async function analyzeFoodPhoto(base64Image, mimeType = 'image/jpeg') {
-  const model = getModel();
-
   const imagePart = {
     inlineData: {
       data: base64Image,
@@ -202,22 +244,22 @@ export async function analyzeFoodPhoto(base64Image, mimeType = 'image/jpeg') {
     }
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }, imagePart] }],
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }, imagePart] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+    return parseJsonSafe(result.response.text());
   });
-
-  return parseJsonSafe(result.response.text());
 }
 
 /**
  * Recognizes food from a text description (voice transcript fallback)
  */
 export async function analyzeFoodText(description) {
-  const model = getModel();
-
   const prompt = `
     Analyze this text description of a meal: "${description}". Identify EACH distinct food item separately.
     Return ONLY a JSON object. No markdown, no explanation, no text outside JSON.
@@ -255,22 +297,22 @@ export async function analyzeFoodText(description) {
     }
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+    return parseJsonSafe(result.response.text());
   });
-
-  return parseJsonSafe(result.response.text());
 }
 
 /**
  * Conducts body assessment from uploaded photos
  */
 export async function analyzeBodyPhotos(base64Images, profile, mimeType = 'image/jpeg') {
-  const model = getModel();
-
   const imageParts = base64Images.map((img) => ({
     inlineData: {
       data: img,
@@ -294,18 +336,19 @@ export async function analyzeBodyPhotos(base64Images, profile, mimeType = 'image
     Be supportive, factual, and strictly constructive. Avoid overly critical language.
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }, ...imageParts] }]
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }, ...imageParts] }]
+    });
+    return result.response.text();
   });
-  return result.response.text();
 }
 
 /**
  * Re-evaluates next week's fitness plan based on history
  */
 export async function reEvaluatePlan(profile, currentPlan, completionRate, weightTrend, qualitativeFeedback) {
-  const model = getModel();
-
   const prompt = `
     You are an adaptive fitness coach. Review the user's performance this week and adjust their fitness plan.
     - User Goal: ${profile.fitness_goal}
@@ -345,14 +388,16 @@ export async function reEvaluatePlan(profile, currentPlan, completionRate, weigh
     }
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: 'application/json',
-    },
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+    return JSON.parse(result.response.text());
   });
-
-  return JSON.parse(result.response.text());
 }
 
 // Utility to calculate age
@@ -402,16 +447,16 @@ export async function chatWithCoach(profile, messages) {
     parts: [{ text: msg.content }]
   }));
 
-  const chatModel = genAI.getGenerativeModel({
-    model: modelName,
-    systemInstruction: systemInstruction
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const chatModel = genAI.getGenerativeModel({
+      model: modelToUse,
+      systemInstruction: systemInstruction
+    });
+    const result = await chatModel.generateContent({
+      contents: chatContents
+    });
+    return result.response.text();
   });
-
-  const result = await chatModel.generateContent({
-    contents: chatContents
-  });
-
-  return result.response.text();
 }
 
 /**
@@ -447,31 +492,33 @@ export async function chatWithCoachStream(profile, messages) {
     parts: [{ text: msg.content }]
   }));
 
-  const chatModel = genAI.getGenerativeModel({
-    model: modelName,
-    systemInstruction: systemInstruction
-  });
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const chatModel = genAI.getGenerativeModel({
+      model: modelToUse,
+      systemInstruction: systemInstruction
+    });
 
-  const resultStream = await chatModel.generateContentStream({
-    contents: chatContents
-  });
+    const resultStream = await chatModel.generateContentStream({
+      contents: chatContents
+    });
 
-  const encoder = new TextEncoder();
-  return new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of resultStream.stream) {
-          const chunkText = chunk.text();
-          if (chunkText) {
-            controller.enqueue(encoder.encode(chunkText));
+    const encoder = new TextEncoder();
+    return new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of resultStream.stream) {
+            const chunkText = chunk.text();
+            if (chunkText) {
+              controller.enqueue(encoder.encode(chunkText));
+            }
           }
+        } catch (err) {
+          controller.error(err);
+        } finally {
+          controller.close();
         }
-      } catch (err) {
-        controller.error(err);
-      } finally {
-        controller.close();
       }
-    }
+    });
   });
 }
 
@@ -479,8 +526,6 @@ export async function chatWithCoachStream(profile, messages) {
  * Transcribes audio clip to plain text using Gemini API
  */
 export async function transcribeAudio(base64Audio, mimeType = 'audio/webm') {
-  const model = getModel();
-
   const audioPart = {
     inlineData: {
       data: base64Audio,
@@ -497,10 +542,12 @@ export async function transcribeAudio(base64Audio, mimeType = 'audio/webm') {
     If the audio is silent or unintelligible, return an empty string or "Unintelligible audio".
   `;
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }, audioPart] }],
+  return executeWithRetryAndFallback(async (modelToUse) => {
+    const model = getModel(modelToUse);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }, audioPart] }],
+    });
+    return result.response.text().trim();
   });
-
-  return result.response.text().trim();
 }
 

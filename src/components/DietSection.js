@@ -447,7 +447,7 @@ export default function DietSection({
         console.log('Retrying analysis once...');
         runAnalysis(base64, path, true);
       } else {
-        setPipelineError('Could not analyze. Try a clearer photo or log manually.');
+        setPipelineError(err.message || 'Could not analyze. Try a clearer photo or log manually.');
         setPipelineStep('failed');
         setRetryAction(() => () => runAnalysis(base64, path));
       }
@@ -511,7 +511,7 @@ export default function DietSection({
       if (!isRetry) {
         runTextAnalysis(textVal, true);
       } else {
-        setPipelineError('Verbal analysis failed. Try manual log or template quick-picks.');
+        setPipelineError(err.message || 'Verbal analysis failed. Try manual log or template quick-picks.');
         setPipelineStep('failed');
         setRetryAction(() => () => runTextAnalysis(textVal));
       }
