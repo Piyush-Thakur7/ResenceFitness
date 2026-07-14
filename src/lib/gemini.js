@@ -1,14 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY;
-const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
+const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash';
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
-// Retry and Fallback configuration constants
+// Retry configuration constants
 const GEMINI_RETRY_DELAYS = [1000, 2000, 4000];
 const GEMINI_MAX_RETRIES = 3;
-const PRIMARY_GEMINI_MODEL = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
-const FALLBACK_GEMINI_MODEL = PRIMARY_GEMINI_MODEL === 'gemini-3.5-flash' ? 'gemini-2.5-flash' : 'gemini-1.5-flash';
 
 // Helper to check if Gemini is configured, accepts custom model override
 function getModel(customModelName) {
@@ -20,53 +18,39 @@ function getModel(customModelName) {
 
 /**
  * Executes a Gemini request with retry logic (exponential backoff)
- * and falls back across a chain of models if errors occur.
+ * on the configured model without falling back to other model names.
  */
 async function executeWithRetryAndFallback(callFn) {
-  const modelsToTry = [
-    PRIMARY_GEMINI_MODEL,
-    FALLBACK_GEMINI_MODEL,
-    'gemini-1.5-flash',
-    'gemini-2.0-flash'
-  ];
-  
-  // Filter out duplicates and falsy values to keep fallback path distinct
-  const uniqueModels = Array.from(new Set(modelsToTry.filter(Boolean)));
-  let lastError = null;
+  const modelToUse = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash';
 
-  for (const modelName of uniqueModels) {
-    for (let attempt = 0; attempt < GEMINI_MAX_RETRIES; attempt++) {
-      try {
-        return await callFn(modelName);
-      } catch (err) {
-        lastError = err;
-        const errStr = err.message || '';
-        const isTransient = err.status === 503 || 
-                            err.status === 429 ||
-                            errStr.includes('503') || 
-                            errStr.includes('429') ||
-                            errStr.includes('Service Unavailable') || 
-                            errStr.includes('resource exhausted') ||
-                            errStr.includes('RESOURCE_EXHAUSTED') ||
-                            errStr.includes('overloaded') ||
-                            errStr.includes('high demand') ||
-                            errStr.includes('Rate limit');
-        
-        // If it's a non-transient error (e.g. Model Not Found 404), skip retrying this model
-        if (!isTransient) {
-          console.warn(`Non-transient error on model ${modelName}: ${errStr}. Cascading to next model.`);
-          break;
-        }
+  for (let attempt = 0; attempt < GEMINI_MAX_RETRIES; attempt++) {
+    try {
+      return await callFn(modelToUse);
+    } catch (err) {
+      const errStr = err.message || '';
+      const isTransient = err.status === 503 || 
+                          err.status === 429 ||
+                          errStr.includes('503') || 
+                          errStr.includes('429') ||
+                          errStr.includes('Service Unavailable') || 
+                          errStr.includes('resource exhausted') ||
+                          errStr.includes('RESOURCE_EXHAUSTED') ||
+                          errStr.includes('overloaded') ||
+                          errStr.includes('high demand') ||
+                          errStr.includes('Rate limit');
+      
+      // If it's a non-transient error, throw it immediately
+      if (!isTransient) {
+        throw err;
+      }
 
-        console.warn(`Transient Gemini error on model ${modelName} (attempt ${attempt + 1}/${GEMINI_MAX_RETRIES}). Retrying...`);
-        if (attempt < GEMINI_MAX_RETRIES - 1) {
-          await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAYS[attempt]));
-        }
+      console.warn(`Transient Gemini error on model ${modelToUse} (attempt ${attempt + 1}/${GEMINI_MAX_RETRIES}). Retrying...`);
+      if (attempt < GEMINI_MAX_RETRIES - 1) {
+        await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAYS[attempt]));
       }
     }
   }
 
-  console.error("All fallback models in cascade failed. Final exception:", lastError);
   throw new Error('Having trouble reaching the AI right now, please try again in a moment');
 }
 
