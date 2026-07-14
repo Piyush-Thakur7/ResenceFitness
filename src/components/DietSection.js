@@ -385,9 +385,9 @@ export default function DietSection({
         console.log('Retrying upload once...');
         runUpload(blob, base64, true);
       } else {
-        setPipelineError(`${errMsg}. Try again?`);
-        setPipelineStep('failed');
-        setRetryAction(() => () => runUpload(blob, base64));
+        console.warn('Storage upload failed, proceeding to direct analysis without saving photo:', errMsg);
+        setUploadedPath(null);
+        runAnalysis(base64, null);
       }
     }
   };

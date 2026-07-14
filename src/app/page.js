@@ -687,28 +687,32 @@ export default function Home() {
     }
 
     try {
-      // 1. Upload photos to Supabase Storage
+      // 1. Upload photos to Supabase Storage (degrades gracefully if bucket is missing/unconfigured)
       const uploadedUrls = [];
-      for (let i = 0; i < base64Images.length; i++) {
-        const base64 = base64Images[i];
-        const fileName = `${userId}/${Date.now()}_${i}.jpg`;
-        
-        // Convert to blob
-        const binary = atob(base64);
-        const array = [];
-        for (let j = 0; j < binary.length; j++) {
-          array.push(binary.charCodeAt(j));
+      try {
+        for (let i = 0; i < base64Images.length; i++) {
+          const base64 = base64Images[i];
+          const fileName = `${userId}/${Date.now()}_${i}.jpg`;
+          
+          // Convert to blob
+          const binary = atob(base64);
+          const array = [];
+          for (let j = 0; j < binary.length; j++) {
+            array.push(binary.charCodeAt(j));
+          }
+          const blob = new Blob([new Uint8Array(array)], { type: 'image/jpeg' });
+
+          const { data: uploadData, error: uploadErr } = await supabase.storage
+            .from('body-photos')
+            .upload(fileName, blob, { contentType: 'image/jpeg' });
+
+          if (uploadErr) throw uploadErr;
+          
+          // Store path only as required
+          uploadedUrls.push(uploadData.path);
         }
-        const blob = new Blob([new Uint8Array(array)], { type: 'image/jpeg' });
-
-        const { data: uploadData, error: uploadErr } = await supabase.storage
-          .from('body-photos')
-          .upload(fileName, blob, { contentType: 'image/jpeg' });
-
-        if (uploadErr) throw uploadErr;
-        
-        // Store path only as required
-        uploadedUrls.push(uploadData.path);
+      } catch (storageErr) {
+        console.warn('Storage upload for body photos failed, proceeding directly to AI analysis:', storageErr);
       }
 
       // 2. Call Gemini API
