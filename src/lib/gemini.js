@@ -51,7 +51,8 @@ async function executeWithRetryAndFallback(callFn) {
     }
   }
 
-  throw new Error('Having trouble reaching the AI right now, please try again in a moment');
+  console.error("Gemini API call failed completely. Final exception:", lastError);
+  throw new Error(`Having trouble reaching the AI right now: ${lastError.message || lastError}`);
 }
 
 function parseJsonSafe(responseText) {
