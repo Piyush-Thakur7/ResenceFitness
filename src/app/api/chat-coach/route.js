@@ -1,4 +1,5 @@
 import { chatWithCoachStream } from '@/lib/gemini';
+import { verifySession } from '@/lib/auth';
 
 /**
  * POST handler for AI Coach chat requests. Streams text chunks directly.
@@ -7,6 +8,9 @@ import { chatWithCoachStream } from '@/lib/gemini';
  */
 export async function POST(req) {
   try {
+    const { errorResponse } = await verifySession(req);
+    if (errorResponse) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+
     const { profile, messages } = await req.json();
 
     if (!profile) {

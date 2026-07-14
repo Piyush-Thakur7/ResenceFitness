@@ -486,9 +486,15 @@ export default function Home() {
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const res = await fetch('/api/generate-plan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token || ''}`,
+        },
         body: JSON.stringify({
           profile,
           assessmentReport: assessments[0]?.assessment_report || '',
@@ -607,9 +613,15 @@ export default function Home() {
       });
     }
 
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
     const res = await fetch('/api/analyze-food', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token || ''}`,
+      },
       body: JSON.stringify({ image: base64Data, mimeType, description }),
     });
     const data = await res.json();
@@ -700,9 +712,15 @@ export default function Home() {
       }
 
       // 2. Call Gemini API
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const token = currentSession?.access_token;
+
       const res = await fetch('/api/analyze-body', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token || ''}`,
+        },
         body: JSON.stringify({
           images: base64Images,
           profile,

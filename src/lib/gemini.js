@@ -2,8 +2,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const apiKey = process.env.GEMINI_API_KEY;
 const modelName = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
-
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+// Retry and Fallback configuration constants
+const GEMINI_RETRY_DELAYS = [1000, 2000, 4000];
+const GEMINI_MAX_RETRIES = 3;
+const PRIMARY_GEMINI_MODEL = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
+const FALLBACK_GEMINI_MODEL = PRIMARY_GEMINI_MODEL === 'gemini-3.5-flash' ? 'gemini-2.5-flash' : 'gemini-1.5-flash';
 
 // Helper to check if Gemini is configured, accepts custom model override
 function getModel(customModelName) {
@@ -15,17 +20,12 @@ function getModel(customModelName) {
 
 /**
  * Executes a Gemini request with retry logic (exponential backoff)
- * and falls back to gemini-2.5-flash if gemini-3.5-flash fails.
+ * and falls back to a secondary model if primary model is exhausted.
  */
 async function executeWithRetryAndFallback(callFn) {
-  const maxRetries = 3;
-  const delays = [1000, 2000, 4000];
-  const primary = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-1.5-flash';
-  const fallback = primary === 'gemini-3.5-flash' ? 'gemini-2.5-flash' : 'gemini-1.5-flash';
-
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
+  for (let attempt = 0; attempt < GEMINI_MAX_RETRIES; attempt++) {
     try {
-      return await callFn(primary);
+      return await callFn(PRIMARY_GEMINI_MODEL);
     } catch (err) {
       const errStr = err.message || '';
       const is503 = err.status === 503 || 
@@ -40,19 +40,19 @@ async function executeWithRetryAndFallback(callFn) {
         throw err;
       }
 
-      console.warn(`Gemini 503 error on ${primary} (attempt ${attempt + 1}/${maxRetries}). Retrying...`);
-      if (attempt < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+      console.warn(`Gemini 503 error on ${PRIMARY_GEMINI_MODEL} (attempt ${attempt + 1}/${GEMINI_MAX_RETRIES}). Retrying...`);
+      if (attempt < GEMINI_MAX_RETRIES - 1) {
+        await new Promise(resolve => setTimeout(resolve, GEMINI_RETRY_DELAYS[attempt]));
       }
     }
   }
 
   // Backup model fallback
-  console.warn(`Primary model ${primary} failed. Falling back to backup model ${fallback}...`);
+  console.warn(`Primary model ${PRIMARY_GEMINI_MODEL} failed. Falling back to backup model ${FALLBACK_GEMINI_MODEL}...`);
   try {
-    return await callFn(fallback);
+    return await callFn(FALLBACK_GEMINI_MODEL);
   } catch (err) {
-    console.error(`Fallback model ${fallback} also failed:`, err);
+    console.error(`Fallback model ${FALLBACK_GEMINI_MODEL} also failed:`, err);
     throw new Error('Having trouble reaching the AI right now, please try again in a moment');
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export function useVoiceRecorder(onTranscriptReceived) {
   const [isRecording, setIsRecording] = useState(false);
@@ -86,9 +87,15 @@ export function useVoiceRecorder(onTranscriptReceived) {
         reader.readAsDataURL(blob);
       });
 
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const res = await fetch('/api/transcribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token || ''}`,
+        },
         body: JSON.stringify({ audio: base64Audio, mimeType }),
       });
 

@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { generateWorkoutPlan, generateDietPlan } from '@/lib/gemini';
+import { verifySession } from '@/lib/auth';
 
 export async function POST(req) {
   try {
+    const { errorResponse } = await verifySession(req);
+    if (errorResponse) return errorResponse;
+
     const { profile, assessmentReport, type } = await req.json();
 
     if (!profile) {

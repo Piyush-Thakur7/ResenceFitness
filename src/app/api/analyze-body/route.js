@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { analyzeBodyPhotos } from '@/lib/gemini';
+import { verifySession } from '@/lib/auth';
 
 export async function POST(req) {
   try {
+    const { errorResponse } = await verifySession(req);
+    if (errorResponse) return errorResponse;
+
     const { images, profile, mimeType } = await req.json();
 
     if (!images || !Array.isArray(images) || images.length === 0) {

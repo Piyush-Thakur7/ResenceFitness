@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
+import { supabase } from '@/lib/supabase';
 
 const SUGGESTED_PROMPTS = [
   { text: 'Lower back is sore, what variations should I do?', icon: '🩹' },
@@ -78,9 +79,15 @@ How can I help you optimize your training, recovery, or diet structure today? Re
       const chatHistory = [...messages, userMessage];
       setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const res = await fetch('/api/chat-coach', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token || ''}`,
+        },
         body: JSON.stringify({ profile, messages: chatHistory }),
       });
 

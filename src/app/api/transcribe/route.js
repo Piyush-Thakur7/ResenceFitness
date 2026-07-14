@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { transcribeAudio } from '@/lib/gemini';
+import { verifySession } from '@/lib/auth';
 
 export async function POST(req) {
   try {
+    const { errorResponse } = await verifySession(req);
+    if (errorResponse) return errorResponse;
+
     const { audio, mimeType } = await req.json();
 
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your-gemini-api-key') {
